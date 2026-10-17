@@ -54,6 +54,7 @@ describe("generateLibraryModule", () => {
           video_url: `https://project.supabase.co/storage/v1/object/public/exercise-media/squat/${fakeOid("b")}.mp4`,
         },
       ],
+      hash: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
   });
 
