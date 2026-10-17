@@ -17,6 +17,7 @@
     "validate": "tsx src/validate.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^3.25.0",
     "@hono/node-server": "^2.1.5",
     "@hono/zod-openapi": "^1.6.3",
     "hono": "^4.13.13",

@@ -1,8 +1,3 @@
 # Deliberate breaking API changes CI allows, one per line, copied from the
 # oasdiff error or warning (see "API contract" in AGENTS.md). Empty unless a
 # removal is under review.
-GET /exercises added `#/components/schemas/ExercisePage, #/components/schemas/ExerciseBatch` to the response body `anyOf` list for the response status `200`
-GET /exercises the response's body `type` changed from `object` to `any` for status `200`
-GET /exercises removed the required property `data` from the response with the `200` status
-GET /exercises removed the required property `hasMore` from the response with the `200` status
-GET /exercises removed the required property `total` from the response with the `200` status

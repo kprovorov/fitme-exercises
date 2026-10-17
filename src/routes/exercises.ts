@@ -1,5 +1,6 @@
 import { createRoute, type Hook, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { Env } from "hono";
+import { BEARER_AUTH } from "../auth";
 import {
   ErrorResponse,
   Exercise,
@@ -15,6 +16,15 @@ const MAX_LIMIT = 50;
 const MAX_SEARCH = 100;
 const MAX_SLUGS = 40;
 const LIST_PARAMETERS = ["limit", "muscle_group", "offset", "search"] as const;
+
+/** Every content route answers 401 without a caller (`requireCaller`). */
+const unauthorized = {
+  content: { "application/json": { schema: ErrorResponse } },
+  description: "No valid Clerk session token or server secret",
+};
+
+/** A Clerk session token or a server secret, as `Authorization: Bearer`. */
+const security = [{ [BEARER_AUTH]: [] }];
 
 const listExercises = createRoute({
   method: "get",
@@ -98,7 +108,9 @@ const listExercises = createRoute({
       content: { "application/json": { schema: ErrorResponse } },
       description: "An invalid query parameter",
     },
+    401: unauthorized,
   },
+  security,
   summary: "List Exercises, or look up a batch by Exercise slug",
 });
 
@@ -115,11 +127,13 @@ const getExercise = createRoute({
       content: { "application/json": { schema: Exercise } },
       description: "The Exercise",
     },
+    401: unauthorized,
     404: {
       content: { "application/json": { schema: ErrorResponse } },
       description: "No Exercise has this Exercise slug",
     },
   },
+  security,
   summary: "Get one Exercise by Exercise slug",
 });
 

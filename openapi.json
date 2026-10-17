@@ -10,6 +10,13 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "A Clerk session token, or the Coach's or MCP server's secret",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    },
     "schemas": {
       "ExercisePage": {
         "type": "object",
@@ -220,6 +227,11 @@
     },
     "/exercises": {
       "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "List Exercises, or look up a batch by Exercise slug",
         "parameters": [
           {
@@ -309,12 +321,27 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No valid Clerk session token or server secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     },
     "/exercises/{slug}": {
       "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Get one Exercise by Exercise slug",
         "parameters": [
           {
@@ -334,6 +361,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid Clerk session token or server secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
