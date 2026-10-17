@@ -59,13 +59,14 @@ const listExercises = createRoute({
         }),
         slugs: z
           .string()
-          .transform((slugs) => [...new Set(slugs.split(","))])
+          .transform((slugs) => slugs.split(","))
           .pipe(z.array(z.string().min(1)).min(1).max(MAX_SLUGS))
+          .transform((slugs) => [...new Set(slugs)])
           .optional()
           // the generator would describe the parsed array: the parameter is
           // the comma-separated string
           .openapi({
-            description: `Comma-separated Exercise slugs to look up instead of listing: at most ${MAX_SLUGS} (a repeated one counts once), not combined with \`search\`, \`muscle_group\`, \`limit\` or \`offset\`.`,
+            description: `Comma-separated Exercise slugs to look up instead of listing: at most ${MAX_SLUGS} (a repeated one is answered once), not combined with \`search\`, \`muscle_group\`, \`limit\` or \`offset\`.`,
             example: "bench-press,squat",
             type: "string",
           }),
@@ -98,7 +99,7 @@ const listExercises = createRoute({
       description: "An invalid query parameter",
     },
   },
-  summary: "List Exercises",
+  summary: "List Exercises, or look up a batch by Exercise slug",
 });
 
 const getExercise = createRoute({

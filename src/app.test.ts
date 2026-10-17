@@ -263,10 +263,8 @@ describe("GET /exercises pagination", () => {
 });
 
 const batch = async (slugs: string, rest = "") => {
-  const response = await listApp.request(`/exercises?slugs=${slugs}${rest}`);
-  // an error body (400) is asserted with toEqual, which takes any shape
-  const body = (await response.json()) as ExerciseBatch;
-  return { body, status: response.status };
+  const { body, status } = await list(`?slugs=${slugs}${rest}`);
+  return { body: body as unknown as ExerciseBatch, status };
 };
 
 describe("GET /exercises?slugs (batch lookup)", () => {
@@ -301,13 +299,13 @@ describe("GET /exercises?slugs (batch lookup)", () => {
   const slugList = (count: number) =>
     Array.from({ length: count }, (_, i) => `exercise-${i}`).join(",");
 
-  it("looks up at most 40 Exercise slugs, counting each once", async () => {
+  it("looks up at most 40 Exercise slugs", async () => {
     expect((await batch(slugList(40))).body.missing).toHaveLength(40);
-    expect((await batch(`${slugList(40)},exercise-0`)).status).toBe(200);
   });
 
   it.each([
     ["41 Exercise slugs", slugList(41)],
+    ["41 Exercise slugs with a repeat", `${slugList(40)},exercise-0`],
     ["an empty slugs", ""],
     ["an empty Exercise slug in the list", "squat,,deadlift"],
   ])("answers %s with 400 in the error shape", async (_, slugs) => {
@@ -336,6 +334,13 @@ describe("GET /exercises?slugs (batch lookup)", () => {
       });
     }
   );
+
+  it("lets devices cache a batch, tagged with the library hash", async () => {
+    const response = await listApp.request("/exercises?slugs=squat");
+
+    expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
+    expect(response.headers.get("ETag")).toMatch(LIBRARY_ETAG);
+  });
 
   it("shows both response shapes of GET /exercises, and slugs as a string, in the OpenAPI definition", () => {
     const document = listApp.getOpenAPIDocument({
