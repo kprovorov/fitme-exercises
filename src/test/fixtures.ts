@@ -71,12 +71,15 @@ export const mp4 = ({
   handler = "vide",
   samples = 10,
   describe = true,
+  sizeEntries = samples,
 }: {
   brands?: string[];
   handler?: string;
   samples?: number;
   /** Include the video sample entry that `stsd` declares (it always declares one). */
   describe?: boolean;
+  /** How many entries the sample size table actually holds. */
+  sizeEntries?: number;
 } = {}) => {
   const [major, ...compatible] = brands;
   const minorVersion = Buffer.alloc(4);
@@ -90,8 +93,12 @@ export const mp4 = ({
   const stsd = describe
     ? Buffer.concat([stsdHeader, box("avc1", visualSampleEntry)])
     : stsdHeader;
-  const stsz = Buffer.alloc(12);
+  // sample_size 0: a table of one 4-byte size per sample follows.
+  const stsz = Buffer.alloc(12 + 4 * sizeEntries);
   stsz.writeUInt32BE(samples, 8);
+  for (let i = 0; i < sizeEntries; i += 1) {
+    stsz.writeUInt32BE(100, 12 + 4 * i);
+  }
   return Buffer.concat([
     box(
       "ftyp",

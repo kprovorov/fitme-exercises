@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { lstat, readdir, readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import type { z } from "zod";
 import { type MediaFormat, readMedia } from "./media";
@@ -150,6 +150,10 @@ const readFolderFile = async (
   file: string
 ): Promise<Buffer | undefined> => {
   try {
+    if ((await lstat(join(folder.dir, file))).isSymbolicLink()) {
+      folder.report(file, "symlinks aren't allowed: commit the file itself");
+      return;
+    }
     return await readFile(join(folder.dir, file));
   } catch (error) {
     const { code } = error as NodeJS.ErrnoException;
@@ -297,7 +301,7 @@ const readMediaKind = async (
 
   // Check the size before reading: an oversized file is never a pointer, so
   // it's downloaded content that needn't be loaded into memory.
-  const stats = await stat(join(folder.dir, file));
+  const stats = await lstat(join(folder.dir, file));
   if (stats.isFile() && stats.size > kind.maxSize) {
     reportOversized(folder, file, kind, stats.size);
     return;

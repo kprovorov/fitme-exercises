@@ -114,14 +114,15 @@ const hasSamples = (bytes: Buffer, stbl: Box) => {
   const described = children(bytes, stbl, "stsd").some((stsd) =>
     hasVideoSampleEntries(bytes, stsd)
   );
-  const sampled = [
-    ...children(bytes, stbl, "stsz"),
-    ...children(bytes, stbl, "stz2"),
-  ].some(
-    // stsz/stz2: version and flags (4), sample size or field size (4), then sample_count.
-    (sizes) =>
-      sizes.end - sizes.start >= 12 && bytes.readUInt32BE(sizes.start + 8) > 0
-  );
+  const sampled =
+    [
+      ...children(bytes, stbl, "stsz").filter((stsz) =>
+        isSampleSizes(bytes, stsz)
+      ),
+      ...children(bytes, stbl, "stz2").filter((stz2) =>
+        isCompactSampleSizes(bytes, stz2)
+      ),
+    ].length > 0;
   return described && sampled;
 };
 
@@ -150,5 +151,36 @@ const hasVideoSampleEntries = (bytes: Buffer, stsd: Box) => {
         bytes.readUInt16BE(entry.start + 24) > 0 &&
         bytes.readUInt16BE(entry.start + 26) > 0
     )
+  );
+};
+
+/**
+ * stsz: version and flags (4), sample_size (4), sample_count (4), then one
+ * 4-byte size per sample when sample_size is 0.
+ */
+const isSampleSizes = (bytes: Buffer, stsz: Box) => {
+  if (stsz.end - stsz.start < 12) {
+    return false;
+  }
+  const sampleSize = bytes.readUInt32BE(stsz.start + 4);
+  const count = bytes.readUInt32BE(stsz.start + 8);
+  const tableSize = sampleSize === 0 ? 4 * count : 0;
+  return count > 0 && stsz.end - stsz.start >= 12 + tableSize;
+};
+
+/**
+ * stz2: version and flags (4), reserved (3), field_size (1: 4, 8 or 16 bits),
+ * sample_count (4), then the packed sizes.
+ */
+const isCompactSampleSizes = (bytes: Buffer, stz2: Box) => {
+  if (stz2.end - stz2.start < 12) {
+    return false;
+  }
+  const fieldSize = bytes.readUInt8(stz2.start + 7);
+  const count = bytes.readUInt32BE(stz2.start + 8);
+  return (
+    [4, 8, 16].includes(fieldSize) &&
+    count > 0 &&
+    stz2.end - stz2.start >= 12 + Math.ceil((fieldSize * count) / 8)
   );
 };

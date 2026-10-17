@@ -1,4 +1,4 @@
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -414,6 +414,11 @@ describe("loadLibrary", () => {
       "not a valid MP4 video: no video track",
     ],
     [
+      "an MP4 whose sample size table is truncated",
+      mp4({ sizeEntries: 3 }),
+      "not a valid MP4 video: no video track",
+    ],
+    [
       "a truncated MP4",
       mp4().subarray(0, -4),
       "not a valid MP4: malformed box structure",
@@ -455,6 +460,38 @@ describe("loadLibrary", () => {
       ]);
     }
   );
+
+  it("reports symlinked media and metadata", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/originals/metadata.json": JSON.stringify({
+        name: "Bench Press",
+      }),
+      "bench-press/originals/video.mp4": lfsPointer(fakeOid("b"), 100),
+    });
+    await Promise.all(
+      [
+        ["video.mp4", "originals/video.mp4"],
+        ["en/metadata.json", "../originals/metadata.json"],
+      ].map(async ([link, target]) => {
+        await rm(join(dir, "bench-press", link));
+        await symlink(target, join(dir, "bench-press", link));
+      })
+    );
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/en/metadata.json",
+        message: "symlinks aren't allowed: commit the file itself",
+      },
+      {
+        exercise: "bench-press",
+        file: "bench-press/video.mp4",
+        message: "symlinks aren't allowed: commit the file itself",
+      },
+    ]);
+  });
 
   it("reports a corrupt thumbnail whose header is intact", async () => {
     await writeFiles(dir, {
