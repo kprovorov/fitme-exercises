@@ -461,34 +461,59 @@ describe("loadLibrary", () => {
     }
   );
 
-  it("reports symlinked media and metadata", async () => {
+  it("reports symlinked media, metadata and locale folders", async () => {
     await writeFiles(dir, {
       ...prefix("bench-press", exerciseFiles()),
-      "bench-press/originals/metadata.json": JSON.stringify({
-        name: "Bench Press",
-      }),
-      "bench-press/originals/video.mp4": lfsPointer(fakeOid("b"), 100),
+      ...prefix("squat", exerciseFiles("Squat")),
     });
     await Promise.all(
       [
-        ["video.mp4", "originals/video.mp4"],
-        ["en/metadata.json", "../originals/metadata.json"],
+        ["bench-press/video.mp4", "../squat/video.mp4"],
+        ["bench-press/metadata.json", "../squat/metadata.json"],
+        ["bench-press/en", "../squat/en"],
       ].map(async ([link, target]) => {
-        await rm(join(dir, "bench-press", link));
-        await symlink(target, join(dir, "bench-press", link));
+        await rm(join(dir, link), { recursive: true });
+        await symlink(target, join(dir, link));
       })
     );
 
     expect(await problems()).toEqual([
       {
         exercise: "bench-press",
-        file: "bench-press/en/metadata.json",
+        file: "bench-press/metadata.json",
         message: "symlinks aren't allowed: commit the file itself",
+      },
+      {
+        exercise: "bench-press",
+        file: "bench-press/en",
+        message: "symlinks aren't allowed: commit the folder itself",
       },
       {
         exercise: "bench-press",
         file: "bench-press/video.mp4",
         message: "symlinks aren't allowed: commit the file itself",
+      },
+    ]);
+  });
+
+  it("reports unexpected files in Exercise and locale folders", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/.DS_Store": "",
+      "bench-press/en/notes.md": "draft\n",
+      "bench-press/source.mp4": "raw video committed without Git LFS",
+    });
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/source.mp4",
+        message: expect.stringContaining("unexpected file"),
+      },
+      {
+        exercise: "bench-press",
+        file: "bench-press/en/notes.md",
+        message: expect.stringContaining("unexpected file"),
       },
     ]);
   });
@@ -513,10 +538,12 @@ describe("loadLibrary", () => {
     await rm(join(dir, "bench-press/en"), { recursive: true });
     await writeFiles(dir, { "bench-press/en": "" });
 
-    expect((await problems()).map(({ file }) => file)).toEqual([
-      "bench-press/en/metadata.json",
-      "bench-press/en/description.md",
-      "bench-press/en/instructions.md",
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/en",
+        message: "expected a locale folder, found a file",
+      },
     ]);
   });
 

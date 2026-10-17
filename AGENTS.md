@@ -47,6 +47,7 @@ exercises/
 - Muscle groups must come from `src/library/muscle-groups.ts`, at least one, no repeats.
 - Metadata and markdown files must be valid UTF-8. Metadata files are strict: unknown keys are problems. New fields are added to the schema first.
 - Media extensions are lowercase: `thumbnail.jpg` (not `.jpeg` or `.JPG`), `thumbnail.png`, `thumbnail.webp`, `video.mp4`. Exactly one thumbnail and one video per Exercise.
+- An Exercise folder holds only `metadata.json`, `en/`, a thumbnail and a video; a locale folder holds only its three files. Anything else is an unexpected file. Symlinks aren't allowed anywhere in an Exercise.
 - Files and folders starting with `.` are ignored. Anything else at the top of `exercises/` that isn't a folder (including a symlink) is a problem.
 
 Every problem names the Exercise and the file, e.g. `bench-press/metadata.json: unknown muscle group "neck"`.

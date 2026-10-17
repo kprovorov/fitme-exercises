@@ -49,6 +49,17 @@ export interface LoadOptions {
   requireLfsPointers?: boolean;
 }
 
+const EXERCISE_ENTRIES = new Set(["metadata.json", "en"]);
+const LOCALE_ENTRIES = new Set([
+  "metadata.json",
+  "description.md",
+  "instructions.md",
+]);
+const MEDIA_NAMES = new Set(["thumbnail", "video"]);
+
+const stripExtension = (name: string) =>
+  name.slice(0, name.length - extname(name).length);
+
 /** One Exercise folder being read, and where its problems go. */
 interface Folder {
   dir: string;
@@ -125,9 +136,23 @@ const loadExercise = async (
     );
   }
 
+  const files = (await readdir(folder.dir)).filter(
+    (name) => !name.startsWith(".")
+  );
+  reportUnexpected(
+    folder,
+    "",
+    files.filter(
+      (name) =>
+        !(
+          EXERCISE_ENTRIES.has(name) ||
+          MEDIA_NAMES.has(stripExtension(name).toLowerCase())
+        )
+    ),
+    "an Exercise folder holds only metadata.json, en/, a thumbnail and a video"
+  );
   const metadata = await readJson(folder, "metadata.json", ExerciseMetadata);
   const en = await readLocale(folder, "en");
-  const files = await readdir(folder.dir);
   const thumbnail = await readMediaKind(folder, files, THUMBNAIL);
   const video = await readMediaKind(folder, files, VIDEO);
 
@@ -218,6 +243,25 @@ const readLocale = async (
   folder: Folder,
   locale: Locale
 ): Promise<ExerciseText | undefined> => {
+  const stats = await lstat(join(folder.dir, locale)).catch(() => undefined);
+  if (stats?.isSymbolicLink()) {
+    folder.report(locale, "symlinks aren't allowed: commit the folder itself");
+    return;
+  }
+  if (stats && !stats.isDirectory()) {
+    folder.report(locale, "expected a locale folder, found a file");
+    return;
+  }
+  if (stats) {
+    reportUnexpected(
+      folder,
+      locale,
+      (await readdir(join(folder.dir, locale))).filter(
+        (name) => !(name.startsWith(".") || LOCALE_ENTRIES.has(name))
+      ),
+      "a locale folder holds only metadata.json, description.md and instructions.md"
+    );
+  }
   const metadata = await readJson(
     folder,
     `${locale}/metadata.json`,
@@ -248,9 +292,7 @@ const findMediaFile = (
 ): { file: string; extension: string; contentType: string } | undefined => {
   const allowed = Object.keys(kind.contentTypes);
   const candidates = files.filter(
-    (name) =>
-      name.slice(0, name.length - extname(name).length).toLowerCase() ===
-      kind.name
+    (name) => stripExtension(name).toLowerCase() === kind.name
   );
 
   if (candidates.length === 0) {
@@ -358,6 +400,17 @@ const readMediaKind = async (
     path: `${folder.slug}/${file}`,
     size,
   };
+};
+
+const reportUnexpected = (
+  folder: Folder,
+  dir: string,
+  names: string[],
+  rule: string
+) => {
+  for (const name of names) {
+    folder.report(dir ? `${dir}/${name}` : name, `unexpected file: ${rule}`);
+  }
 };
 
 const reportOversized = (
