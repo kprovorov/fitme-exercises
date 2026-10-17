@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    env:
+      # Never download LFS content: the loader reads content hashes and sizes
+      # from the pointer files.
+      GIT_LFS_SKIP_SMUDGE: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          lfs: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format (ultracite)
+        run: pnpm check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Validate the Exercise Library
+        run: pnpm validate --require-lfs-pointers
