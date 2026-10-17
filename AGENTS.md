@@ -19,7 +19,8 @@ src/build/library-module.ts  loader → generated module source, media URLs reso
 src/served-library.ts     ServedLibrary (with the library hash) and the media URLs (bucket exercise-media, <slug>/<lfs-oid>.<ext>)
 src/cache.ts              deviceCache: Cache-Control, the library-hash ETag and 304 on every content route
 src/schemas.ts            zod-openapi response schemas: the one field definition (ExerciseSummary, Exercise)
-src/create-app.ts         createApp({ library }): the Hono app (routes in src/routes/), JSON 404/500 handlers
+src/auth.ts               requireCaller: the bearer token → a Caller (server secret or Clerk User), else 401
+src/create-app.ts         createApp({ auth, library }): the Hono app (routes in src/routes/), JSON 404/500 handlers
 src/app.ts                default export createApp() with the generated library: Vercel's entrypoint
 src/index.ts              Node server (pnpm dev, pnpm start)
 src/openapi.ts            pnpm openapi: writes openapi.json, the committed OpenAPI spec (not served)
@@ -49,9 +50,12 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 
 `pnpm generate` (run by `pnpm dev` and `pnpm build`) needs `SUPABASE_URL`, the https URL of the Supabase project whose `exercise-media` bucket holds the media; put it in `.env.local` (see `.env.example`). It fails on an invalid Exercise Library. Re-run it (or restart `pnpm dev`) after changing content: the API never reads `exercises/` at runtime.
 
+At runtime the API reads `CLERK_JWT_KEY_PRODUCTION` and `CLERK_JWT_KEY_DEVELOPMENT` (each Clerk instance's PEM public key) and `EXERCISES_COACH_SECRET` and `EXERCISES_MCP_SECRET` (server secrets, at least 32 characters: `openssl rand -hex 32`). Unset, each accepts nothing.
+
 ## Exercise Library API
 
 - `GET /health`: public liveness.
+- Every other route needs `Authorization: Bearer <token>`, checked in order: a server secret (`EXERCISES_COACH_SECRET` or `EXERCISES_MCP_SECRET`, constant-time; unset or under 32 characters accepts nothing), then a Clerk session token verified networkless against either Clerk key (it must carry its session, `sid`: a JWT template's token is refused). Anything else is `401 unauthorized`. No Pro gate. The resolved caller is `c.get("caller")`: `{ type: "user", userId }` (the token's `sub`) or `{ type: "server", name: "coach" | "mcp" }`.
 - `GET /exercises`: `{ data: ExerciseSummary[], total, hasMore }`, alphabetical by name. Query: `search` (case-insensitive substring of the name, trimmed, at most 100 characters, matched against the lowercased name index built by `pnpm generate`; `%` and `_` are literal), `muscle_group` (the enum), `limit` (1–50, default 20), `offset` (default 0). An offset past the end is an empty page; an invalid parameter is `400` (`invalid_request`).
 - `GET /exercises?slugs=a,b,c`: batch lookup on the same route, `{ data: ExerciseSummary[], missing: string[] }`. `data` follows the order of `slugs`, unknown slugs go in `missing` (no 404), a repeated slug is answered once. At most 40 slugs, repeats included; more, an empty `slugs` or an empty item, or `slugs` combined with `search`, `muscle_group`, `limit` or `offset` is `400`.
 - `GET /exercises/:slug`: the `Exercise`, or `404`.
@@ -59,7 +63,7 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 - Caching: every successful content response (everything under `/exercises`) carries `Cache-Control: private, max-age=3600` and `ETag: "<library hash>"`, the sha256 of every Exercise as served, so any change to text, muscle groups or media changes it. A matching `If-None-Match` answers `304` with no body. Errors and `/health` carry neither. Add content routes under `/exercises` so they're covered. The ETag only changes with the library, so every response body must be derived from `ServedLibrary`: a code-only change to an existing response's shape would be served stale to devices through `304`. Add fields through `serveLibrary` (and `src/schemas.ts`).
 - `thumbnail_url` is Supabase's image transformation (render) endpoint for the object: clients append `width`/`height`. `video_url` is the public object URL. Both are built from the LFS oid, so a URL changes whenever the content does.
 - Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix): see API contract.
-- Tests drive `createApp` through `app.request` with fixture Exercises (`src/app.test.ts`).
+- Tests drive `createApp` through `app.request` with fixture Exercises (`src/app.test.ts`), signing Clerk tokens with test RSA keys (`src/test/clerk.ts`, one per Clerk instance).
 
 ## API contract
 

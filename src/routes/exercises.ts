@@ -16,6 +16,12 @@ const MAX_SEARCH = 100;
 const MAX_SLUGS = 40;
 const LIST_PARAMETERS = ["limit", "muscle_group", "offset", "search"] as const;
 
+/** Every content route answers 401 without a caller (`requireCaller`). */
+const unauthorized = {
+  content: { "application/json": { schema: ErrorResponse } },
+  description: "No valid Clerk session token or server secret",
+};
+
 const listExercises = createRoute({
   method: "get",
   path: "/exercises",
@@ -98,6 +104,7 @@ const listExercises = createRoute({
       content: { "application/json": { schema: ErrorResponse } },
       description: "An invalid query parameter",
     },
+    401: unauthorized,
   },
   summary: "List Exercises, or look up a batch by Exercise slug",
 });
@@ -115,6 +122,7 @@ const getExercise = createRoute({
       content: { "application/json": { schema: Exercise } },
       description: "The Exercise",
     },
+    401: unauthorized,
     404: {
       content: { "application/json": { schema: ErrorResponse } },
       description: "No Exercise has this Exercise slug",

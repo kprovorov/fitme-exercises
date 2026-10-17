@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createApp } from "./create-app";
+import { type AppDeps, createApp } from "./create-app";
 import { muscleGroups } from "./library/muscle-groups";
 import type { Exercise as LibraryExercise } from "./library/types";
 import type { ExerciseBatch, ExercisePage } from "./schemas";
 import { serveLibrary } from "./served-library";
+import { clerkInstance, clerkToken } from "./test/clerk";
 import { fakeOid, libraryExercise } from "./test/fixtures";
 
 const SUPABASE_URL = "https://project.supabase.co";
@@ -11,7 +12,22 @@ const SUPABASE_URL = "https://project.supabase.co";
 /** The library hash, a sha256, quoted. */
 const LIBRARY_ETAG = /^"[0-9a-f]{64}"$/;
 
+const COACH_SECRET = "c".repeat(32);
+const MCP_SECRET = "m".repeat(64);
+
+const production = clerkInstance();
+const development = clerkInstance();
+
+const auth: AppDeps["auth"] = {
+  clerkJwtKeys: {
+    development: development.jwtKey,
+    production: production.jwtKey,
+  },
+  serverSecrets: { coach: COACH_SECRET, mcp: MCP_SECRET },
+};
+
 const app = createApp({
+  auth,
   library: serveLibrary(
     {
       exercises: [
@@ -23,14 +39,39 @@ const app = createApp({
   ),
 });
 
+const asUser = {
+  headers: {
+    authorization: `Bearer ${clerkToken(production.privateKey, { sub: "user_alice" })}`,
+  },
+};
+
+/** An app whose `/caller` route answers the caller auth resolved. */
+const callerApp = (deps: Partial<AppDeps> = {}) =>
+  createApp({
+    auth,
+    library: serveLibrary({ exercises: [] }, SUPABASE_URL),
+    ...deps,
+  }).get("/caller", (c) => c.json(c.get("caller")));
+
+const bearer = (token: string) => ({
+  headers: { authorization: `Bearer ${token}` },
+});
+
+const unauthorized = {
+  error: {
+    code: "unauthorized",
+    message: "A Clerk session token or a server secret is required",
+  },
+};
+
 /** An app serving an empty Exercise Library, for adding test routes to. */
 const emptyApp = () =>
-  createApp({ library: serveLibrary({ exercises: [] }, SUPABASE_URL) });
+  createApp({ auth, library: serveLibrary({ exercises: [] }, SUPABASE_URL) });
 
 const currentEtag = async () => {
-  const etag = (await app.request("/exercises/bench-press")).headers.get(
-    "ETag"
-  );
+  const etag = (
+    await app.request("/exercises/bench-press", asUser)
+  ).headers.get("ETag");
   if (!etag) {
     throw new Error("no ETag");
   }
@@ -38,6 +79,7 @@ const currentEtag = async () => {
 };
 
 const listApp = createApp({
+  auth,
   library: serveLibrary(
     {
       // sorted by Exercise slug, as the loader returns them
@@ -54,7 +96,7 @@ const listApp = createApp({
 });
 
 const list = async (query = "") => {
-  const response = await listApp.request(`/exercises${query}`);
+  const response = await listApp.request(`/exercises${query}`, asUser);
   // an error body (400) is asserted with toEqual, which takes any shape
   const body = (await response.json()) as ExercisePage;
   return { body, status: response.status };
@@ -62,6 +104,118 @@ const list = async (query = "") => {
 
 const names = (body: ExercisePage) =>
   body.data.map((exercise) => exercise.name);
+
+describe("auth", () => {
+  it("answers a content route without a token with 401", async () => {
+    const response = await app.request("/exercises/bench-press");
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual(unauthorized);
+  });
+
+  it("checks the token before answering 304", async () => {
+    const etag = await currentEtag();
+
+    const response = await app.request("/exercises/squat", {
+      headers: { "If-None-Match": etag },
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("ETag")).toBeNull();
+  });
+
+  it("resolves the User from a production Clerk token", async () => {
+    const response = await callerApp().request("/caller", asUser);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      type: "user",
+      userId: "user_alice",
+    });
+  });
+
+  it("resolves the User from a development Clerk token", async () => {
+    const response = await callerApp().request(
+      "/caller",
+      bearer(clerkToken(development.privateKey, { sub: "user_bob" }))
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ type: "user", userId: "user_bob" });
+  });
+
+  it.each([
+    ["a garbage token", { authorization: "Bearer not-a-jwt" }],
+    ["a non-bearer scheme", { authorization: `Basic ${COACH_SECRET}` }],
+    [
+      "an expired token",
+      {
+        authorization: `Bearer ${clerkToken(production.privateKey, {
+          exp: Math.floor(Date.now() / 1000) - 60,
+          sub: "user_alice",
+        })}`,
+      },
+    ],
+    [
+      "a token signed by an unknown key",
+      {
+        authorization: `Bearer ${clerkToken(clerkInstance().privateKey, {
+          sub: "user_alice",
+        })}`,
+      },
+    ],
+    [
+      "a token without a session (a JWT template's)",
+      {
+        authorization: `Bearer ${clerkToken(production.privateKey, {
+          sid: undefined,
+          sub: "user_alice",
+        })}`,
+      },
+    ],
+    ["a wrong secret", { authorization: `Bearer ${"x".repeat(32)}` }],
+  ])("answers %s with 401", async (_case, headers) => {
+    const response = await app.request("/exercises/bench-press", { headers });
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual(unauthorized);
+  });
+
+  it.each([
+    ["coach", COACH_SECRET],
+    ["mcp", MCP_SECRET],
+  ])("resolves the %s server caller from its secret", async (name, secret) => {
+    const response = await callerApp().request("/caller", bearer(secret));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ name, type: "server" });
+  });
+
+  it("accepts nothing with a secret under 32 characters", async () => {
+    const short = "s".repeat(31);
+    const response = await callerApp({
+      auth: { ...auth, serverSecrets: { coach: short, mcp: short } },
+    }).request("/caller", bearer(short));
+
+    expect(response.status).toBe(401);
+  });
+
+  it("accepts nothing with an unset secret", async () => {
+    const response = await callerApp({
+      auth: { ...auth, serverSecrets: {} },
+    }).request("/caller", bearer(COACH_SECRET));
+
+    expect(response.status).toBe(401);
+  });
+
+  it("accepts no Clerk token with no Clerk keys", async () => {
+    const response = await callerApp({
+      auth: { ...auth, clerkJwtKeys: {} },
+    }).request("/caller", asUser);
+
+    expect(response.status).toBe(401);
+  });
+});
 
 describe("GET /exercises", () => {
   it("lists every Exercise alphabetically by name, as summaries", async () => {
@@ -104,6 +258,7 @@ describe("GET /exercises search", () => {
 
   it("treats % and _ as literal characters", async () => {
     const wildcardApp = createApp({
+      auth,
       library: serveLibrary(
         {
           exercises: [
@@ -119,7 +274,8 @@ describe("GET /exercises search", () => {
       names(
         (await (
           await wildcardApp.request(
-            `/exercises?search=${encodeURIComponent(term)}`
+            `/exercises?search=${encodeURIComponent(term)}`,
+            asUser
           )
         ).json()) as ExercisePage
       );
@@ -230,6 +386,7 @@ describe("GET /exercises pagination", () => {
       (_, i) => `exercise-${String(i).padStart(2, "0")}`
     );
     const big = createApp({
+      auth,
       library: serveLibrary(
         { exercises: slugs.map((slug) => libraryExercise(slug, slug)) },
         SUPABASE_URL
@@ -237,7 +394,7 @@ describe("GET /exercises pagination", () => {
     });
 
     const body = (await (
-      await big.request("/exercises")
+      await big.request("/exercises", asUser)
     ).json()) as ExercisePage;
 
     expect(body.data).toHaveLength(20);
@@ -382,7 +539,7 @@ describe("GET /exercises?slugs (batch lookup)", () => {
 
 describe("GET /exercises/:slug", () => {
   it("answers the full Exercise", async () => {
-    const response = await app.request("/exercises/bench-press");
+    const response = await app.request("/exercises/bench-press", asUser);
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -397,7 +554,7 @@ describe("GET /exercises/:slug", () => {
   });
 
   it("answers an unknown Exercise slug with 404 in the error shape", async () => {
-    const response = await app.request("/exercises/deadlift");
+    const response = await app.request("/exercises/deadlift", asUser);
 
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
@@ -408,7 +565,7 @@ describe("GET /exercises/:slug", () => {
 
 describe("device caching", () => {
   it("lets devices cache a content response for an hour, tagged with the library hash", async () => {
-    const response = await app.request("/exercises/bench-press");
+    const response = await app.request("/exercises/bench-press", asUser);
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
@@ -419,7 +576,7 @@ describe("device caching", () => {
     const etag = await currentEtag();
 
     const response = await app.request("/exercises/squat", {
-      headers: { "If-None-Match": etag },
+      headers: { ...asUser.headers, "If-None-Match": etag },
     });
 
     expect(response.status).toBe(304);
@@ -436,7 +593,7 @@ describe("device caching", () => {
     });
 
     const response = await withVary.request("/exercises/test/vary", {
-      headers: { "If-None-Match": "*" },
+      headers: { ...asUser.headers, "If-None-Match": "*" },
     });
 
     expect(response.status).toBe(304);
@@ -452,7 +609,7 @@ describe("device caching", () => {
     const etag = await currentEtag();
 
     const response = await app.request("/exercises/squat", {
-      headers: { "If-None-Match": ifNoneMatch(etag) },
+      headers: { ...asUser.headers, "If-None-Match": ifNoneMatch(etag) },
     });
 
     expect(response.status).toBe(304);
@@ -460,7 +617,7 @@ describe("device caching", () => {
 
   it("answers normally when If-None-Match holds another ETag", async () => {
     const response = await app.request("/exercises/squat", {
-      headers: { "If-None-Match": `"${"0".repeat(64)}"` },
+      headers: { ...asUser.headers, "If-None-Match": `"${"0".repeat(64)}"` },
     });
 
     expect(response.status).toBe(200);
@@ -472,8 +629,8 @@ describe("device caching", () => {
       c.json({ data: [] })
     );
 
-    const later = await withLater.request("/exercises/later/route");
-    const listed = await withLater.request("/exercises");
+    const later = await withLater.request("/exercises/later/route", asUser);
+    const listed = await withLater.request("/exercises", asUser);
 
     expect(later.headers.get("ETag")).toMatch(LIBRARY_ETAG);
     expect(listed.headers.get("ETag")).toMatch(LIBRARY_ETAG);
@@ -490,10 +647,10 @@ describe("device caching", () => {
 
     const responses = [
       await app.request("/exercises/deadlift", {
-        headers: { "If-None-Match": etag },
+        headers: { ...asUser.headers, "If-None-Match": etag },
       }),
-      await app.request("/exercises/squat/nope"),
-      await failing.request("/exercises/boom/now"),
+      await app.request("/exercises/squat/nope", asUser),
+      await failing.request("/exercises/boom/now", asUser),
     ];
 
     expect(responses.map((response) => response.status)).toEqual([
@@ -552,6 +709,7 @@ describe("device caching", () => {
   ])("changes the ETag when %s changes", async (_, change) => {
     const etag = await currentEtag();
     const changed = createApp({
+      auth,
       library: serveLibrary(
         {
           exercises: [
@@ -564,7 +722,7 @@ describe("device caching", () => {
     });
 
     const response = await changed.request("/exercises/squat", {
-      headers: { "If-None-Match": etag },
+      headers: { ...asUser.headers, "If-None-Match": etag },
     });
 
     expect(response.status).toBe(200);
@@ -584,7 +742,7 @@ describe("GET /health", () => {
 
 describe("errors", () => {
   it("answers an unknown route with a JSON 404", async () => {
-    const response = await app.request("/nope");
+    const response = await app.request("/nope", asUser);
 
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
@@ -600,7 +758,7 @@ describe("errors", () => {
       // keep the expected error out of the test output
     });
 
-    const response = await failing.request("/boom");
+    const response = await failing.request("/boom", asUser);
 
     expect(response.status).toBe(500);
     expect(await response.json()).toEqual({
