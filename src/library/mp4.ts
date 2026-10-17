@@ -26,7 +26,8 @@ interface Box {
 /**
  * Checks that `bytes` is a structurally valid MP4 with a video track: an
  * `ftyp` box first with an MP4 brand, well-formed boxes throughout, and a
- * `moov/trak/mdia/hdlr` whose handler is `vide`. Returns a problem, or
+ * video track: `moov/trak/mdia` with a `vide` handler and a sample table
+ * (`minf/stbl`) describing at least one sample. Samples aren't decoded. Returns a problem, or
  * undefined when the file is a valid MP4 video.
  */
 export const checkMp4 = (bytes: Buffer): string | undefined => {
@@ -95,10 +96,33 @@ const hasVideoTrack = (bytes: Buffer, top: Box[]) =>
     .filter((box) => box.type === "moov")
     .flatMap((moov) => children(bytes, moov, "trak"))
     .flatMap((trak) => children(bytes, trak, "mdia"))
-    .flatMap((mdia) => children(bytes, mdia, "hdlr"))
-    // hdlr: version and flags (4), pre_defined (4), then handler_type.
     .some(
-      (hdlr) =>
-        hdlr.end - hdlr.start >= 12 &&
-        bytes.toString("latin1", hdlr.start + 8, hdlr.start + 12) === "vide"
+      (mdia) =>
+        children(bytes, mdia, "hdlr").some(isVideoHandler(bytes)) &&
+        children(bytes, mdia, "minf")
+          .flatMap((minf) => children(bytes, minf, "stbl"))
+          .some((stbl) => hasSamples(bytes, stbl))
     );
+
+const isVideoHandler = (bytes: Buffer) => (hdlr: Box) =>
+  // hdlr: version and flags (4), pre_defined (4), then handler_type.
+  hdlr.end - hdlr.start >= 12 &&
+  bytes.toString("latin1", hdlr.start + 8, hdlr.start + 12) === "vide";
+
+/** A sample table with a sample description and at least one sample. */
+const hasSamples = (bytes: Buffer, stbl: Box) => {
+  const described = children(bytes, stbl, "stsd").some(
+    // stsd: version and flags (4), then entry_count.
+    (stsd) =>
+      stsd.end - stsd.start >= 8 && bytes.readUInt32BE(stsd.start + 4) > 0
+  );
+  const sampled = [
+    ...children(bytes, stbl, "stsz"),
+    ...children(bytes, stbl, "stz2"),
+  ].some(
+    // stsz/stz2: version and flags (4), sample size or field size (4), then sample_count.
+    (sizes) =>
+      sizes.end - sizes.start >= 12 && bytes.readUInt32BE(sizes.start + 8) > 0
+  );
+  return described && sampled;
+};

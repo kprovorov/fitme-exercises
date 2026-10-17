@@ -388,6 +388,11 @@ describe("loadLibrary", () => {
       "not a valid MP4 video: no video track",
     ],
     [
+      "an MP4 whose video track has no samples",
+      mp4({ samples: 0 }),
+      "not a valid MP4 video: no video track",
+    ],
+    [
       "a truncated MP4",
       mp4().subarray(0, -4),
       "not a valid MP4: malformed box structure",
@@ -407,6 +412,28 @@ describe("loadLibrary", () => {
       { exercise: "bench-press", file: "bench-press/video.mp4", message },
     ]);
   });
+
+  it.each(["en/metadata.json", "en/description.md"])(
+    "reports invalid UTF-8 in %s",
+    async (file) => {
+      await writeFiles(dir, {
+        ...prefix("bench-press", exerciseFiles()),
+        [`bench-press/${file}`]: Buffer.concat([
+          Buffer.from('{ "name": "Bench '),
+          Buffer.from([0xff]),
+          Buffer.from('" }'),
+        ]),
+      });
+
+      expect(await problems()).toEqual([
+        {
+          exercise: "bench-press",
+          file: `bench-press/${file}`,
+          message: "not valid UTF-8",
+        },
+      ]);
+    }
+  );
 
   it("reports a corrupt thumbnail whose header is intact", async () => {
     await writeFiles(dir, {

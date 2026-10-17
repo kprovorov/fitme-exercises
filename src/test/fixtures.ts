@@ -65,18 +65,24 @@ export const box = (type: string, ...content: Buffer[]) => {
   return Buffer.concat([header, body]);
 };
 
-/** A minimal MP4: `ftyp` with the given brands, one track with the given handler. */
+/** A minimal MP4: `ftyp` with the given brands, one track with the given handler and sample count. */
 export const mp4 = ({
   brands = ["isom", "isom", "mp42"],
   handler = "vide",
+  samples = 10,
 }: {
   brands?: string[];
   handler?: string;
+  samples?: number;
 } = {}) => {
   const [major, ...compatible] = brands;
   const minorVersion = Buffer.alloc(4);
   const hdlr = Buffer.alloc(24);
   hdlr.write(handler, 8, "latin1");
+  const stsd = Buffer.alloc(8);
+  stsd.writeUInt32BE(samples > 0 ? 1 : 0, 4);
+  const stsz = Buffer.alloc(12);
+  stsz.writeUInt32BE(samples, 8);
   return Buffer.concat([
     box(
       "ftyp",
@@ -84,7 +90,17 @@ export const mp4 = ({
       minorVersion,
       ...compatible.map((brand) => Buffer.from(brand, "latin1"))
     ),
-    box("moov", box("trak", box("mdia", box("hdlr", hdlr)))),
+    box(
+      "moov",
+      box(
+        "trak",
+        box(
+          "mdia",
+          box("hdlr", hdlr),
+          box("minf", box("stbl", box("stsd", stsd), box("stsz", stsz)))
+        )
+      )
+    ),
     box("mdat", Buffer.alloc(16)),
   ]);
 };

@@ -169,8 +169,19 @@ const readFolderFile = async (
   }
 };
 
-const readText = async (folder: Folder, file: string) =>
-  (await readFolderFile(folder, file))?.toString("utf8");
+const utf8 = new TextDecoder("utf-8", { fatal: true });
+
+const readText = async (folder: Folder, file: string) => {
+  const bytes = await readFolderFile(folder, file);
+  if (!bytes) {
+    return;
+  }
+  try {
+    return utf8.decode(bytes);
+  } catch {
+    folder.report(file, "not valid UTF-8");
+  }
+};
 
 const readJson = async <T extends z.ZodType>(
   folder: Folder,
