@@ -9,6 +9,7 @@
     "dev": "pnpm generate && tsx watch --env-file-if-exists=.env.local src/index.ts",
     "fix": "ultracite fix",
     "generate": "tsx --env-file-if-exists=.env.local src/generate.ts",
+    "openapi": "tsx src/openapi.ts",
     "start": "node dist/node/index.js",
     "test": "vitest run",
     "test:watch": "vitest",

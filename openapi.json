@@ -1,0 +1,174 @@
+{
+  "info": {
+    "title": "Exercise Library API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "servers": [
+    {
+      "url": "https://exercises.fitmeproject.com"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Exercise": {
+        "type": "object",
+        "properties": {
+          "muscle_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MuscleGroup"
+            }
+          },
+          "name": {
+            "type": "string",
+            "example": "Bench Press"
+          },
+          "slug": {
+            "type": "string",
+            "example": "bench-press"
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The thumbnail through Supabase's image transformation endpoint: append `width` and/or `height` query parameters."
+          },
+          "video_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The public video URL (mp4)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Markdown."
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Markdown."
+          }
+        },
+        "required": [
+          "muscle_groups",
+          "name",
+          "slug",
+          "thumbnail_url",
+          "video_url",
+          "description",
+          "instructions"
+        ]
+      },
+      "MuscleGroup": {
+        "type": "string",
+        "enum": [
+          "chest",
+          "back",
+          "shoulders",
+          "biceps",
+          "triceps",
+          "forearms",
+          "abs",
+          "obliques",
+          "quadriceps",
+          "hamstrings",
+          "glutes",
+          "calves",
+          "traps",
+          "lats",
+          "lower-back",
+          "cardio",
+          "full-body"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "not_found"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Liveness",
+        "responses": {
+          "200": {
+            "description": "The API is up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercises/{slug}": {
+      "get": {
+        "summary": "Get one Exercise by Exercise slug",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "example": "bench-press"
+            },
+            "required": true,
+            "name": "slug",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Exercise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No Exercise has this Exercise slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
