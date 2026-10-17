@@ -45,6 +45,7 @@ pnpm start               # run dist/node/index.js
 ## Exercise Library API
 
 - `GET /health`: public liveness.
+- `GET /exercises`: `{ data: ExerciseSummary[], total, hasMore }`, alphabetical by name. Query: `search` (case-insensitive substring of the name, matched against the lowercased name index built by `pnpm generate`; `%` and `_` are literal), `muscle_group` (the enum), `limit` (1–50, default 20), `offset` (default 0). An offset past the end is an empty page; an invalid parameter is `400` (`invalid_request`).
 - `GET /exercises/:slug`: the `Exercise`, or `404`.
 - Errors are `{ error: { code, message } }`, like the monorepo's `apps/api`.
 - Caching: every successful content response (everything under `/exercises`) carries `Cache-Control: private, max-age=3600` and `ETag: "<library hash>"`, the sha256 of every Exercise as served, so any change to text, muscle groups or media changes it. A matching `If-None-Match` answers `304` with no body. Errors and `/health` carry neither. Add content routes under `/exercises` so they're covered. The ETag only changes with the library, so every response body must be derived from `ServedLibrary`: a code-only change to an existing response's shape would be served stale to devices through `304`. Add fields through `serveLibrary` (and `src/schemas.ts`).

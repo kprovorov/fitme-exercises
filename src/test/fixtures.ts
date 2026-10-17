@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import type { MuscleGroup } from "../library/muscle-groups";
 import type { Exercise } from "../library/types";
 
 export const lfsPointer = (oid: string, size: number) =>
@@ -21,7 +22,11 @@ export const exerciseFiles = (
 });
 
 /** A loaded Exercise, as the loader returns it for `exerciseFiles(name)` in `<slug>/`. */
-export const libraryExercise = (slug: string, name: string): Exercise => ({
+export const libraryExercise = (
+  slug: string,
+  name: string,
+  muscleGroups: MuscleGroup[] = ["chest", "triceps"]
+): Exercise => ({
   locales: {
     en: {
       description: `${name} is a compound pushing movement.\n`,
@@ -29,7 +34,7 @@ export const libraryExercise = (slug: string, name: string): Exercise => ({
       name,
     },
   },
-  muscle_groups: ["chest", "triceps"],
+  muscle_groups: muscleGroups,
   slug,
   thumbnail: {
     contentType: "image/png",

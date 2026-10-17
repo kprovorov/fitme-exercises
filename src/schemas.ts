@@ -1,13 +1,16 @@
 import { z } from "@hono/zod-openapi";
 import { muscleGroups } from "./library/muscle-groups";
 
+/** The muscle group enum, one named schema wherever it appears. */
+export const MuscleGroup = z.enum(muscleGroups).openapi("MuscleGroup");
+
 /**
  * The one field definition every response is built from: `ExerciseSummary`
  * (lists and batch lookups) and `Exercise` (the single lookup) share these
  * fields, so adding a field is one change here.
  */
 const summaryFields = {
-  muscle_groups: z.array(z.enum(muscleGroups).openapi("MuscleGroup")),
+  muscle_groups: z.array(MuscleGroup),
   name: z.string().openapi({ example: "Bench Press" }),
   slug: z.string().openapi({ example: "bench-press" }),
   thumbnail_url: z.url().openapi({
@@ -29,8 +32,21 @@ export const Exercise = z
   })
   .openapi("Exercise");
 
+export const ExercisePage = z
+  .object({
+    data: z.array(ExerciseSummary),
+    hasMore: z
+      .boolean()
+      .openapi({ description: "Whether more matches follow this page." }),
+    total: z.int().openapi({
+      description: "How many Exercises match, across every page.",
+    }),
+  })
+  .openapi("ExercisePage");
+
 export type ExerciseSummary = z.infer<typeof ExerciseSummary>;
 export type Exercise = z.infer<typeof Exercise>;
+export type ExercisePage = z.infer<typeof ExercisePage>;
 
 export const ErrorResponse = z
   .object({
