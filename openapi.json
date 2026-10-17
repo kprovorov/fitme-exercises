@@ -11,7 +11,31 @@
   ],
   "components": {
     "schemas": {
-      "Exercise": {
+      "ExercisePage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExerciseSummary"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "Whether more matches follow this page."
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many Exercises match, across every page."
+          }
+        },
+        "required": [
+          "data",
+          "hasMore",
+          "total"
+        ]
+      },
+      "ExerciseSummary": {
         "type": "object",
         "properties": {
           "muscle_groups": {
@@ -37,14 +61,6 @@
             "type": "string",
             "format": "uri",
             "description": "The public video URL (mp4)."
-          },
-          "description": {
-            "type": "string",
-            "description": "Markdown."
-          },
-          "instructions": {
-            "type": "string",
-            "description": "Markdown."
           }
         },
         "required": [
@@ -52,9 +68,7 @@
           "name",
           "slug",
           "thumbnail_url",
-          "video_url",
-          "description",
-          "instructions"
+          "video_url"
         ]
       },
       "MuscleGroup": {
@@ -102,6 +116,52 @@
         "required": [
           "error"
         ]
+      },
+      "Exercise": {
+        "type": "object",
+        "properties": {
+          "muscle_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MuscleGroup"
+            }
+          },
+          "name": {
+            "type": "string",
+            "example": "Bench Press"
+          },
+          "slug": {
+            "type": "string",
+            "example": "bench-press"
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The thumbnail through Supabase's image transformation endpoint: append `width` and/or `height` query parameters."
+          },
+          "video_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The public video URL (mp4)."
+          },
+          "description": {
+            "type": "string",
+            "description": "Markdown."
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Markdown."
+          }
+        },
+        "required": [
+          "muscle_groups",
+          "name",
+          "slug",
+          "thumbnail_url",
+          "video_url",
+          "description",
+          "instructions"
+        ]
       }
     },
     "parameters": {}
@@ -125,6 +185,83 @@
                   "required": [
                     "ok"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exercises": {
+      "get": {
+        "summary": "List Exercises",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "description": "Page size.",
+              "example": 20
+            },
+            "required": false,
+            "description": "Page size.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/MuscleGroup"
+            },
+            "required": false,
+            "description": "Only Exercises with this muscle group.",
+            "name": "muscle_group",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "description": "How many matches to skip.",
+              "example": 0,
+              "minimum": 0
+            },
+            "required": false,
+            "description": "How many matches to skip.",
+            "name": "offset",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Case-insensitive substring of the name, surrounding whitespace ignored; `%` and `_` match only themselves.",
+              "example": "bench"
+            },
+            "required": false,
+            "description": "Case-insensitive substring of the name, surrounding whitespace ignored; `%` and `_` match only themselves.",
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of matching Exercises, alphabetical by name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExercisePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An invalid query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
