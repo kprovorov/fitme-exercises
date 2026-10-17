@@ -109,12 +109,10 @@ const isVideoHandler = (bytes: Buffer) => (hdlr: Box) =>
   hdlr.end - hdlr.start >= 12 &&
   bytes.toString("latin1", hdlr.start + 8, hdlr.start + 12) === "vide";
 
-/** A sample table with a sample description and at least one sample. */
+/** A sample table with a video sample description and at least one sample. */
 const hasSamples = (bytes: Buffer, stbl: Box) => {
-  const described = children(bytes, stbl, "stsd").some(
-    // stsd: version and flags (4), then entry_count.
-    (stsd) =>
-      stsd.end - stsd.start >= 8 && bytes.readUInt32BE(stsd.start + 4) > 0
+  const described = children(bytes, stbl, "stsd").some((stsd) =>
+    hasVideoSampleEntries(bytes, stsd)
   );
   const sampled = [
     ...children(bytes, stbl, "stsz"),
@@ -125,4 +123,32 @@ const hasSamples = (bytes: Buffer, stbl: Box) => {
       sizes.end - sizes.start >= 12 && bytes.readUInt32BE(sizes.start + 8) > 0
   );
   return described && sampled;
+};
+
+/** VisualSampleEntry content: SampleEntry (8) + visual fields (70). */
+const VISUAL_SAMPLE_ENTRY_SIZE = 78;
+
+/**
+ * stsd: version and flags (4), entry_count, then that many sample entry
+ * boxes. Each must be a well-formed visual sample entry with a width and
+ * height.
+ */
+const hasVideoSampleEntries = (bytes: Buffer, stsd: Box) => {
+  if (stsd.end - stsd.start < 8) {
+    return false;
+  }
+  const count = bytes.readUInt32BE(stsd.start + 4);
+  const entries = parseBoxes(bytes, stsd.start + 8, stsd.end);
+  return (
+    count > 0 &&
+    entries !== undefined &&
+    entries.length === count &&
+    entries.every(
+      (entry) =>
+        entry.end - entry.start >= VISUAL_SAMPLE_ENTRY_SIZE &&
+        // width and height follow SampleEntry (8) and 16 reserved bytes.
+        bytes.readUInt16BE(entry.start + 24) > 0 &&
+        bytes.readUInt16BE(entry.start + 26) > 0
+    )
+  );
 };

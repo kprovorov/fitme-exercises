@@ -70,17 +70,26 @@ export const mp4 = ({
   brands = ["isom", "isom", "mp42"],
   handler = "vide",
   samples = 10,
+  describe = true,
 }: {
   brands?: string[];
   handler?: string;
   samples?: number;
+  /** Include the video sample entry that `stsd` declares (it always declares one). */
+  describe?: boolean;
 } = {}) => {
   const [major, ...compatible] = brands;
   const minorVersion = Buffer.alloc(4);
   const hdlr = Buffer.alloc(24);
   hdlr.write(handler, 8, "latin1");
-  const stsd = Buffer.alloc(8);
-  stsd.writeUInt32BE(samples > 0 ? 1 : 0, 4);
+  const visualSampleEntry = Buffer.alloc(78);
+  visualSampleEntry.writeUInt16BE(64, 24);
+  visualSampleEntry.writeUInt16BE(64, 26);
+  const stsdHeader = Buffer.alloc(8);
+  stsdHeader.writeUInt32BE(1, 4);
+  const stsd = describe
+    ? Buffer.concat([stsdHeader, box("avc1", visualSampleEntry)])
+    : stsdHeader;
   const stsz = Buffer.alloc(12);
   stsz.writeUInt32BE(samples, 8);
   return Buffer.concat([

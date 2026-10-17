@@ -409,6 +409,11 @@ describe("loadLibrary", () => {
       "not a valid MP4 video: no video track",
     ],
     [
+      "an MP4 whose video track has no sample description",
+      mp4({ describe: false }),
+      "not a valid MP4 video: no video track",
+    ],
+    [
       "a truncated MP4",
       mp4().subarray(0, -4),
       "not a valid MP4: malformed box structure",
