@@ -4,14 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "pnpm generate && tsdown",
     "check": "ultracite check",
+    "dev": "pnpm generate && tsx watch --env-file-if-exists=.env.local src/index.ts",
     "fix": "ultracite fix",
+    "generate": "tsx --env-file-if-exists=.env.local src/generate.ts",
+    "start": "node dist/node/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate": "tsx src/validate.ts"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "@hono/zod-openapi": "^1.6.3",
+    "hono": "^4.13.13",
     "image-size": "^2.0.4",
     "sharp": "^0.35.5",
     "zod": "4.6.7"
@@ -19,6 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@types/node": "24.19.2",
+    "tsdown": "^0.23.1",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "ultracite": "^7.12.4",
@@ -26,6 +34,6 @@
   },
   "packageManager": "pnpm@10.34.5",
   "engines": {
-    "node": "^24.3.0 || >=25.0.0"
+    "node": "^24.11.0 || >=26.0.0"
   }
 }

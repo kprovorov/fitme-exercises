@@ -4,7 +4,7 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## What this repo is
 
-`fitme-exercises` owns the **Exercise Library**: its content (metadata and markdown) and media (Git LFS), the loader that validates it, and (later) the Exercise Library API served from `exercises.fitmeproject.com`. It sits next to the main Fitme monorepo and uses the same tooling: pnpm, Node 24, TypeScript, vitest, ultracite (Biome).
+`fitme-exercises` owns the **Exercise Library**: its content (metadata and markdown) and media (Git LFS), the loader that validates it, and the Exercise Library API (served from `exercises.fitmeproject.com` once deployed). It sits next to the main Fitme monorepo and uses the same tooling: pnpm, Node 24, TypeScript, vitest, ultracite (Biome).
 
 ```
 exercises/<slug>/         one folder per Exercise, named after its Exercise slug (see Content layout)
@@ -14,6 +14,13 @@ src/library/mp4.ts        checks an MP4's box structure, brand and video track
 src/library/schema.ts     zod schemas for the metadata files
 src/library/muscle-groups.ts  the muscle group enum: the source of truth
 src/validate.ts           pnpm validate: runs the loader and prints "valid" or every problem
+src/generate.ts           pnpm generate: writes src/generated/library.ts (git-ignored), the Exercise Library the API serves
+src/build/library-module.ts  loader → generated module source, media URLs resolved; problems fail the build
+src/served-library.ts     ServedLibrary and the media URLs (bucket exercise-media, <slug>/<lfs-oid>.<ext>)
+src/schemas.ts            zod-openapi response schemas: the one field definition (ExerciseSummary, Exercise)
+src/create-app.ts         createApp({ library }): the Hono app (routes in src/routes/), JSON 404/500 handlers
+src/app.ts                default export createApp() with the generated library: Vercel's entrypoint
+src/index.ts              Node server (pnpm dev, pnpm start)
 .github/workflows/ci.yml  PR CI: lint, typecheck, tests, validation (no LFS download)
 ```
 
@@ -22,12 +29,26 @@ src/validate.ts           pnpm validate: runs the loader and prints "valid" or e
 ```bash
 pnpm install
 pnpm check / pnpm fix    # ultracite (Biome)
-pnpm typecheck           # tsc --noEmit
+pnpm typecheck           # tsc --noEmit (needs src/generated: run pnpm generate first)
 pnpm test                # vitest
 pnpm exec vitest run src/library/load.test.ts  # a single test file
 pnpm validate [dir]      # validate the Exercise Library (default: exercises/)
 pnpm validate --require-lfs-pointers  # as CI: every media file must be an LFS pointer
+pnpm dev                 # generate, then serve the API on http://localhost:3005 (tsx watch)
+pnpm build               # generate, then bundle with tsdown → dist/ (dist/app.js for Vercel)
+pnpm start               # run dist/node/index.js
 ```
+
+`pnpm generate` (run by `pnpm dev` and `pnpm build`) needs `SUPABASE_URL`, the https URL of the Supabase project whose `exercise-media` bucket holds the media; put it in `.env.local` (see `.env.example`). It fails on an invalid Exercise Library. Re-run it (or restart `pnpm dev`) after changing content: the API never reads `exercises/` at runtime.
+
+## Exercise Library API
+
+- `GET /health`: public liveness.
+- `GET /exercises/:slug`: the `Exercise`, or `404`.
+- Errors are `{ error: { code, message } }`, like the monorepo's `apps/api`.
+- `thumbnail_url` is Supabase's image transformation (render) endpoint for the object: clients append `width`/`height`. `video_url` is the public object URL. Both are built from the LFS oid, so a URL changes whenever the content does.
+- Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix).
+- Tests drive `createApp` through `app.request` with fixture Exercises (`src/app.test.ts`).
 
 ## Content layout
 

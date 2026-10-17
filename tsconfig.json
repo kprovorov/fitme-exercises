@@ -15,5 +15,5 @@
     "moduleResolution": "bundler",
     "noEmit": true
   },
-  "include": ["src", "vitest.config.ts"]
+  "include": ["src", "tsdown.config.ts", "vitest.config.ts"]
 }
