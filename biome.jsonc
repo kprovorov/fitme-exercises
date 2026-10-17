@@ -1,0 +1,11 @@
+{
+  "extends": ["ultracite/biome/core", "ultracite/biome/jest"],
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        "useFilenamingConvention": "off"
+      }
+    }
+  }
+}
