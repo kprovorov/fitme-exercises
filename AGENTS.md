@@ -44,7 +44,7 @@ pnpm start               # run dist/node/index.js
 ## Exercise Library API
 
 - `GET /health`: public liveness.
-- `GET /exercises/:slug`: `{ data: Exercise }`, or `404`.
+- `GET /exercises/:slug`: the `Exercise`, or `404`.
 - Errors are `{ error: { code, message } }`, like the monorepo's `apps/api`.
 - `thumbnail_url` is Supabase's image transformation (render) endpoint for the object: clients append `width`/`height`. `video_url` is the public object URL. Both are built from the LFS oid, so a URL changes whenever the content does.
 - Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix).

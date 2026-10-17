@@ -12,7 +12,7 @@ const getExercise = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ data: Exercise }) } },
+      content: { "application/json": { schema: Exercise } },
       description: "The Exercise",
     },
     404: {
@@ -36,6 +36,6 @@ export const exerciseRoutes = (library: ServedLibrary) => {
         404
       );
     }
-    return c.json({ data: exercise }, 200);
+    return c.json(exercise, 200);
   });
 };

@@ -23,15 +23,13 @@ describe("GET /exercises/:slug", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      data: {
-        description: "Bench Press is a compound pushing movement.\n",
-        instructions: "1. Lie on the bench.\n2. Press.\n",
-        muscle_groups: ["chest", "triceps"],
-        name: "Bench Press",
-        slug: "bench-press",
-        thumbnail_url: `https://project.supabase.co/storage/v1/render/image/public/exercise-media/bench-press/${fakeOid("a")}.png`,
-        video_url: `https://project.supabase.co/storage/v1/object/public/exercise-media/bench-press/${fakeOid("b")}.mp4`,
-      },
+      description: "Bench Press is a compound pushing movement.\n",
+      instructions: "1. Lie on the bench.\n2. Press.\n",
+      muscle_groups: ["chest", "triceps"],
+      name: "Bench Press",
+      slug: "bench-press",
+      thumbnail_url: `https://project.supabase.co/storage/v1/render/image/public/exercise-media/bench-press/${fakeOid("a")}.png`,
+      video_url: `https://project.supabase.co/storage/v1/object/public/exercise-media/bench-press/${fakeOid("b")}.mp4`,
     });
   });
 

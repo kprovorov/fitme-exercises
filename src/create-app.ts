@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { exerciseRoutes } from "./routes/exercises";
@@ -9,13 +9,27 @@ export interface AppDeps {
   library: ServedLibrary;
 }
 
-/** The Exercise Library API. Only /health is public. */
+const health = createRoute({
+  method: "get",
+  path: "/health",
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.object({ ok: z.boolean() }) },
+      },
+      description: "The API is up",
+    },
+  },
+  summary: "Liveness",
+});
+
+/** The Exercise Library API, serving the injected Exercise Library. */
 export const createApp = ({ library }: AppDeps) => {
   const app = new OpenAPIHono();
 
   app.use(logger());
 
-  app.get("/health", (c) => c.json({ ok: true }));
+  app.openapi(health, (c) => c.json({ ok: true }, 200));
 
   app.route("/", exerciseRoutes(library));
 
