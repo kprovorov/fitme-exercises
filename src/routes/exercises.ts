@@ -3,6 +3,7 @@ import type { Env } from "hono";
 import {
   ErrorResponse,
   Exercise,
+  ExerciseBatch,
   ExercisePage,
   ExerciseSummary,
   MuscleGroup,
@@ -12,47 +13,85 @@ import type { ServedLibrary } from "../served-library";
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
 const MAX_SEARCH = 100;
+const MAX_SLUGS = 40;
+const LIST_PARAMETERS = ["limit", "muscle_group", "offset", "search"] as const;
 
 const listExercises = createRoute({
   method: "get",
   path: "/exercises",
   request: {
-    query: z.object({
-      limit: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(MAX_LIMIT)
-        .default(DEFAULT_LIMIT)
-        .openapi({ description: "Page size.", example: DEFAULT_LIMIT }),
-      muscle_group: MuscleGroup.optional().openapi({
-        param: { description: "Only Exercises with this muscle group." },
-      }),
-      offset: z.coerce
-        .number()
-        .int()
-        .min(0)
-        .default(0)
-        // coercion turns null into 0, which the generator reads as nullable:
-        // a query parameter is never null, so the type is given explicitly
-        .openapi({
-          default: 0,
-          description: "How many matches to skip.",
-          example: 0,
-          minimum: 0,
-          type: "integer",
+    // limit and offset have no zod default, so a batch lookup can tell an
+    // absent one from one that was sent: the list applies the defaults
+    query: z
+      .object({
+        limit: z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(MAX_LIMIT)
+          .optional()
+          .openapi({
+            default: DEFAULT_LIMIT,
+            description: "Page size.",
+            example: DEFAULT_LIMIT,
+          }),
+        muscle_group: MuscleGroup.optional().openapi({
+          param: { description: "Only Exercises with this muscle group." },
         }),
-      search: z.string().trim().max(MAX_SEARCH).optional().openapi({
-        description:
-          "Case-insensitive substring of the name, surrounding whitespace ignored; `%` and `_` match only themselves.",
-        example: "bench",
+        offset: z.coerce
+          .number()
+          .int()
+          .min(0)
+          .optional()
+          // coercion turns null into 0, which the generator reads as nullable:
+          // a query parameter is never null, so the type is given explicitly
+          .openapi({
+            default: 0,
+            description: "How many matches to skip.",
+            example: 0,
+            minimum: 0,
+            type: "integer",
+          }),
+        search: z.string().trim().max(MAX_SEARCH).optional().openapi({
+          description:
+            "Case-insensitive substring of the name, surrounding whitespace ignored; `%` and `_` match only themselves.",
+          example: "bench",
+        }),
+        slugs: z
+          .string()
+          .transform((slugs) => [...new Set(slugs.split(","))])
+          .pipe(z.array(z.string().min(1)).min(1).max(MAX_SLUGS))
+          .optional()
+          // the generator would describe the parsed array: the parameter is
+          // the comma-separated string
+          .openapi({
+            description: `Comma-separated Exercise slugs to look up instead of listing: at most ${MAX_SLUGS} (a repeated one counts once), not combined with \`search\`, \`muscle_group\`, \`limit\` or \`offset\`.`,
+            example: "bench-press,squat",
+            type: "string",
+          }),
+      })
+      .superRefine((query, ctx) => {
+        if (query.slugs === undefined) {
+          return;
+        }
+        for (const name of LIST_PARAMETERS) {
+          if (query[name] !== undefined) {
+            ctx.addIssue({
+              code: "custom",
+              message: "can't be combined with slugs",
+              path: [name],
+            });
+          }
+        }
       }),
-    }),
   },
   responses: {
     200: {
-      content: { "application/json": { schema: ExercisePage } },
-      description: "One page of matching Exercises, alphabetical by name",
+      content: {
+        "application/json": { schema: z.union([ExercisePage, ExerciseBatch]) },
+      },
+      description:
+        "One page of matching Exercises, alphabetical by name (`ExercisePage`), or with `slugs`, the Exercises found (`ExerciseBatch`)",
     },
     400: {
       content: { "application/json": { schema: ErrorResponse } },
@@ -101,10 +140,24 @@ export const exerciseRoutes = (library: ServedLibrary) => {
   const summaries = library.exercises.map((exercise) =>
     ExerciseSummary.parse(exercise)
   );
+  const summaryBySlug = new Map(
+    summaries.map((summary) => [summary.slug, summary])
+  );
 
   return new OpenAPIHono({ defaultHook: invalidRequest })
     .openapi(listExercises, (c) => {
-      const { limit, muscle_group, offset, search } = c.req.valid("query");
+      const {
+        limit = DEFAULT_LIMIT,
+        muscle_group,
+        offset = 0,
+        search,
+        slugs,
+      } = c.req.valid("query");
+      if (slugs !== undefined) {
+        const data = slugs.flatMap((slug) => summaryBySlug.get(slug) ?? []);
+        const missing = slugs.filter((slug) => !summaryBySlug.has(slug));
+        return c.json({ data, missing }, 200);
+      }
       const term = search?.toLowerCase();
       const matches = summaries.filter(
         (summary, i) =>
