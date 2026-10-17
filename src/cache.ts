@@ -14,10 +14,11 @@ const matches = (ifNoneMatch: string | undefined, etag: string) =>
   false;
 
 /**
- * Lets devices cache successful content responses: `Cache-Control` (private,
- * since responses need a token) and the Exercise Library hash as the `ETag`.
- * A request whose `If-None-Match` matches gets `304 Not Modified`, no body.
- * Errors stay uncacheable.
+ * Lets devices cache successful content responses: `Cache-Control` (private:
+ * content is for authenticated callers and must never sit in a shared cache)
+ * and the Exercise Library hash as the `ETag`. A request whose
+ * `If-None-Match` matches gets `304 Not Modified` with the 200's headers but
+ * no body. Errors stay uncacheable.
  */
 export const deviceCache = (libraryHash: string) => {
   const etag = `"${libraryHash}"`;

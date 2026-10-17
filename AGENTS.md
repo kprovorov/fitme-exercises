@@ -47,7 +47,7 @@ pnpm start               # run dist/node/index.js
 - `GET /health`: public liveness.
 - `GET /exercises/:slug`: the `Exercise`, or `404`.
 - Errors are `{ error: { code, message } }`, like the monorepo's `apps/api`.
-- Caching: every successful content response (everything under `/exercises`) carries `Cache-Control: private, max-age=3600` and `ETag: "<library hash>"`, the sha256 of every Exercise as served, so any change to text, muscle groups or media changes it. A matching `If-None-Match` answers `304` with no body. Errors and `/health` carry neither. Add content routes under `/exercises` so they're covered.
+- Caching: every successful content response (everything under `/exercises`) carries `Cache-Control: private, max-age=3600` and `ETag: "<library hash>"`, the sha256 of every Exercise as served, so any change to text, muscle groups or media changes it. A matching `If-None-Match` answers `304` with no body. Errors and `/health` carry neither. Add content routes under `/exercises` so they're covered. The ETag only changes with the library, so every response body must be derived from `ServedLibrary`: a code-only change to an existing response's shape would be served stale to devices through `304`. Add fields through `serveLibrary` (and `src/schemas.ts`).
 - `thumbnail_url` is Supabase's image transformation (render) endpoint for the object: clients append `width`/`height`. `video_url` is the public object URL. Both are built from the LFS oid, so a URL changes whenever the content does.
 - Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix).
 - Tests drive `createApp` through `app.request` with fixture Exercises (`src/app.test.ts`).

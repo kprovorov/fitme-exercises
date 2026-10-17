@@ -21,6 +21,10 @@ const app = createApp({
   ),
 });
 
+/** An app serving an empty Exercise Library, for adding test routes to. */
+const emptyApp = () =>
+  createApp({ library: serveLibrary({ exercises: [] }, SUPABASE_URL) });
+
 const currentEtag = async () => {
   const etag = (await app.request("/exercises/bench-press")).headers.get(
     "ETag"
@@ -79,6 +83,21 @@ describe("device caching", () => {
     expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
   });
 
+  it("keeps the headers the 200 would carry on a 304, except its body's", async () => {
+    const withVary = emptyApp().get("/exercises", (c) => {
+      c.header("Vary", "Authorization");
+      return c.json({ data: [] });
+    });
+
+    const response = await withVary.request("/exercises", {
+      headers: { "If-None-Match": "*" },
+    });
+
+    expect(response.status).toBe(304);
+    expect(response.headers.get("Vary")).toBe("Authorization");
+    expect(response.headers.get("Content-Type")).toBeNull();
+  });
+
   it.each([
     ["one of several", (etag: string) => `"old", ${etag}`],
     ["weak", (etag: string) => `W/${etag}`],
@@ -103,9 +122,7 @@ describe("device caching", () => {
   });
 
   it("applies to every content route, including ones added later", async () => {
-    const withList = createApp({
-      library: serveLibrary({ exercises: [] }, SUPABASE_URL),
-    }).get("/exercises", (c) => c.json({ data: [] }));
+    const withList = emptyApp().get("/exercises", (c) => c.json({ data: [] }));
 
     const response = await withList.request("/exercises");
 
@@ -114,9 +131,7 @@ describe("device caching", () => {
 
   it("keeps errors uncacheable, even with a matching If-None-Match", async () => {
     const etag = await currentEtag();
-    const failing = createApp({
-      library: serveLibrary({ exercises: [] }, SUPABASE_URL),
-    }).get("/exercises/boom/now", () => {
+    const failing = emptyApp().get("/exercises/boom/now", () => {
       throw new Error("boom");
     });
     const errors = vi.spyOn(console, "error").mockImplementation(() => {
@@ -228,12 +243,9 @@ describe("errors", () => {
   });
 
   it("answers a thrown error with a JSON 500", async () => {
-    const failing = createApp({ library: { exercises: [], hash: "0" } }).get(
-      "/boom",
-      () => {
-        throw new Error("boom");
-      }
-    );
+    const failing = emptyApp().get("/boom", () => {
+      throw new Error("boom");
+    });
     const errors = vi.spyOn(console, "error").mockImplementation(() => {
       // keep the expected error out of the test output
     });
