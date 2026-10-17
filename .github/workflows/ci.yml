@@ -42,4 +42,4 @@ jobs:
         run: pnpm test
 
       - name: Validate the Exercise Library
-        run: pnpm validate
+        run: pnpm validate --require-lfs-pointers

@@ -6,13 +6,16 @@ import {
   fakeOid,
   lfsPointer,
   makeLibraryDir,
+  mp4,
   pngHeader,
+  TINY_PNG,
   writeFiles,
 } from "../test/fixtures";
 import { loadLibrary } from "./load";
 
-const PNG_640X480_SHA256 =
-  "e0e6fd836f2c429c829e082ee65f96870ef1ac2b9a72f83860398ad2b86c62e6";
+// sha256 of TINY_PNG, computed independently with sha256sum.
+const TINY_PNG_SHA256 =
+  "63ef318d96b5d0d0ceba6e04a4e622b1158335cdc67c49e27839132c6f655058";
 
 let dir: string;
 let cleanup: () => Promise<void>;
@@ -313,7 +316,7 @@ describe("loadLibrary", () => {
   it("reports a thumbnail whose content doesn't match its extension", async () => {
     await writeFiles(dir, prefix("bench-press", exerciseFiles()));
     await rm(join(dir, "bench-press/thumbnail.png"));
-    await writeFiles(dir, { "bench-press/thumbnail.webp": pngHeader(10, 10) });
+    await writeFiles(dir, { "bench-press/thumbnail.webp": TINY_PNG });
 
     expect(await problems()).toEqual([
       {
@@ -341,10 +344,10 @@ describe("loadLibrary", () => {
   });
 
   it("takes the oid of downloaded LFS content from its sha256", async () => {
-    const png = pngHeader(640, 480);
     await writeFiles(dir, {
       ...prefix("bench-press", exerciseFiles()),
-      "bench-press/thumbnail.png": png,
+      "bench-press/thumbnail.png": TINY_PNG,
+      "bench-press/video.mp4": mp4(),
     });
 
     const result = await loadLibrary(dir);
@@ -352,10 +355,9 @@ describe("loadLibrary", () => {
     expect(result.ok && result.library.exercises[0].thumbnail).toEqual({
       contentType: "image/png",
       extension: "png",
-      // sha256 of these 33 bytes, computed independently with sha256sum.
-      oid: PNG_640X480_SHA256,
+      oid: TINY_PNG_SHA256,
       path: "bench-press/thumbnail.png",
-      size: png.length,
+      size: TINY_PNG.length,
     });
   });
 
@@ -369,7 +371,83 @@ describe("loadLibrary", () => {
       {
         exercise: "bench-press",
         file: "bench-press/video.mp4",
-        message: "not an MP4 video or a Git LFS pointer",
+        message: "not a valid MP4: malformed box structure",
+      },
+    ]);
+  });
+
+  it.each([
+    [
+      "a QuickTime movie",
+      mp4({ brands: ["qt  ", "qt  "] }),
+      "not a valid MP4: ftyp has no MP4 brand",
+    ],
+    [
+      "an audio-only MP4",
+      mp4({ handler: "soun" }),
+      "not a valid MP4 video: no video track",
+    ],
+    [
+      "a truncated MP4",
+      mp4().subarray(0, -4),
+      "not a valid MP4: malformed box structure",
+    ],
+    [
+      "a file that is only a ftyp marker",
+      Buffer.from("\0\0\0\x08ftyp", "latin1"),
+      "not a valid MP4: no ftyp box",
+    ],
+  ])("reports %s as the video", async (_, video, message) => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/video.mp4": video,
+    });
+
+    expect(await problems()).toEqual([
+      { exercise: "bench-press", file: "bench-press/video.mp4", message },
+    ]);
+  });
+
+  it("reports a corrupt thumbnail whose header is intact", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/thumbnail.png": pngHeader(64, 64),
+    });
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/thumbnail.png",
+        message: "image can't be decoded (corrupt or truncated)",
+      },
+    ]);
+  });
+
+  it("reports a file where the locale folder belongs", async () => {
+    await writeFiles(dir, prefix("bench-press", exerciseFiles()));
+    await rm(join(dir, "bench-press/en"), { recursive: true });
+    await writeFiles(dir, { "bench-press/en": "" });
+
+    expect((await problems()).map(({ file }) => file)).toEqual([
+      "bench-press/en/metadata.json",
+      "bench-press/en/description.md",
+      "bench-press/en/instructions.md",
+    ]);
+  });
+
+  it("requires LFS pointers when asked to", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/video.mp4": mp4(),
+    });
+
+    expect((await loadLibrary(dir)).ok).toBe(true);
+    const result = await loadLibrary(dir, { requireLfsPointers: true });
+    expect(result.ok ? [] : result.problems).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/video.mp4",
+        message: expect.stringContaining("committed without Git LFS"),
       },
     ]);
   });

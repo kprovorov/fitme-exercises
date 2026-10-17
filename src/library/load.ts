@@ -40,9 +40,19 @@ const VIDEO: MediaKind = {
   name: "video",
 };
 
+export interface LoadOptions {
+  /**
+   * Require every media file to be a Git LFS pointer. Set it where LFS content
+   * is never downloaded (CI): a file that isn't a pointer there was committed
+   * without Git LFS.
+   */
+  requireLfsPointers?: boolean;
+}
+
 /** One Exercise folder being read, and where its problems go. */
 interface Folder {
   dir: string;
+  options: LoadOptions;
   /** Reports a problem with `file` (relative to the folder; "" is the folder itself). */
   report: (file: string, message: string) => void;
   slug: string;
@@ -52,15 +62,22 @@ interface Folder {
  * Reads every Exercise folder under `root` and returns either the validated
  * Exercise Library or every problem found, each naming the Exercise and file.
  */
-export const loadLibrary = async (root: string): Promise<LoadResult> => {
+export const loadLibrary = async (
+  root: string,
+  options: LoadOptions = {}
+): Promise<LoadResult> => {
   const entries = (await readdir(root, { withFileTypes: true }))
     .filter((entry) => !entry.name.startsWith("."))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const loaded = await Promise.all(
-    entries.map((entry) =>
+  // One Exercise at a time: with LFS content downloaded, each holds up to
+  // 45 MB of media in memory.
+  const loaded: { exercise?: Exercise; problems: Problem[] }[] = [];
+  for (const entry of entries) {
+    loaded.push(
       entry.isDirectory()
-        ? loadExercise(root, entry.name)
+        ? // biome-ignore lint/performance/noAwaitInLoops: bounds memory, see above
+          await loadExercise(root, entry.name, options)
         : {
             problems: [
               {
@@ -70,26 +87,28 @@ export const loadLibrary = async (root: string): Promise<LoadResult> => {
               },
             ],
           }
-    )
-  );
+    );
+  }
 
   const problems = loaded.flatMap((result) => result.problems);
   if (problems.length > 0) {
     return { ok: false, problems };
   }
   const exercises = loaded.flatMap((result) =>
-    "exercise" in result && result.exercise ? [result.exercise] : []
+    result.exercise ? [result.exercise] : []
   );
   return { library: { exercises }, ok: true };
 };
 
 const loadExercise = async (
   root: string,
-  slug: string
+  slug: string,
+  options: LoadOptions
 ): Promise<{ exercise?: Exercise; problems: Problem[] }> => {
   const problems: Problem[] = [];
   const folder: Folder = {
     dir: join(root, slug),
+    options,
     report: (file, message) =>
       problems.push({
         exercise: slug,
@@ -136,6 +155,10 @@ const readFolderFile = async (
     const { code } = error as NodeJS.ErrnoException;
     if (code === "ENOENT") {
       folder.report(file, "missing file");
+      return;
+    }
+    if (code === "ENOTDIR") {
+      folder.report(file, "missing file: a folder on its path is a file");
       return;
     }
     if (code === "EISDIR") {
@@ -251,9 +274,16 @@ const readMediaKind = async (
   if (!bytes) {
     return;
   }
-  const read = readMedia(bytes, kind.format);
+  const read = await readMedia(bytes, kind.format, kind.maxPixels);
   if (!read.ok) {
     folder.report(file, read.message);
+    return;
+  }
+  if (folder.options.requireLfsPointers && !read.pointer) {
+    folder.report(
+      file,
+      "committed without Git LFS: run `git lfs install`, then remove and re-add the file"
+    );
     return;
   }
   const { oid, size, dimensions, imageType } = read.media;

@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { imageSize } from "image-size";
+import sharp from "sharp";
+import { checkMp4 } from "./mp4";
 
 const POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
 const POINTER_PATTERN =
@@ -19,7 +21,7 @@ export interface MediaFile {
 }
 
 export type ReadMediaResult =
-  | { ok: true; media: MediaFile }
+  | { ok: true; media: MediaFile; pointer: boolean }
   | { ok: false; message: string };
 
 /**
@@ -28,18 +30,25 @@ export type ReadMediaResult =
  *
  * The oid always equals the Git LFS object id: from a pointer it is read
  * as-is; from content it is the content's sha256, which is how Git LFS
- * defines the oid.
+ * defines the oid. Content is also checked: an MP4 must be a structurally
+ * valid MP4 video; an image must decode, unless its header already puts it
+ * over `maxPixels` (then it isn't decoded and the caller reports the size).
  */
-export const readMedia = (
+export const readMedia = async (
   bytes: Buffer,
-  format: MediaFormat
-): ReadMediaResult => {
+  format: MediaFormat,
+  maxPixels = Number.POSITIVE_INFINITY
+): Promise<ReadMediaResult> => {
   if (isPointer(bytes)) {
     const match = POINTER_PATTERN.exec(bytes.toString("utf8"));
     if (!match) {
       return { message: "malformed Git LFS pointer", ok: false };
     }
-    return { media: { oid: match[1], size: Number(match[2]) }, ok: true };
+    return {
+      media: { oid: match[1], size: Number(match[2]) },
+      ok: true,
+      pointer: true,
+    };
   }
 
   const media: MediaFile = {
@@ -47,12 +56,12 @@ export const readMedia = (
     size: bytes.length,
   };
   if (format === "mp4") {
-    // Every MP4 starts with an `ftyp` box: a 4-byte size, then "ftyp".
-    if (bytes.subarray(4, 8).toString("latin1") !== "ftyp") {
-      return { message: "not an MP4 video or a Git LFS pointer", ok: false };
-    }
-    return { media, ok: true };
+    const problem = checkMp4(bytes);
+    return problem
+      ? { message: problem, ok: false }
+      : { media, ok: true, pointer: false };
   }
+
   try {
     const { width, height, type } = imageSize(bytes);
     media.dimensions = { height, width };
@@ -60,7 +69,20 @@ export const readMedia = (
   } catch {
     return { message: "not a readable image or a Git LFS pointer", ok: false };
   }
-  return { media, ok: true };
+  const { width, height } = media.dimensions;
+  if (width * height <= maxPixels) {
+    try {
+      await sharp(bytes, { failOn: "truncated", limitInputPixels: false })
+        .raw()
+        .toBuffer();
+    } catch {
+      return {
+        message: "image can't be decoded (corrupt or truncated)",
+        ok: false,
+      };
+    }
+  }
+  return { media, ok: true, pointer: false };
 };
 
 const isPointer = (bytes: Buffer) =>

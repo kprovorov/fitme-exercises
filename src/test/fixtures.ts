@@ -49,3 +49,42 @@ export const pngHeader = (width: number, height: number) => {
   bytes.writeUInt8(6, 25);
   return bytes;
 };
+
+/** A real, decodable 1×1 PNG. */
+export const TINY_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64"
+);
+
+/** An ISO base media box: 4-byte size, 4-byte type, then content. */
+export const box = (type: string, ...content: Buffer[]) => {
+  const body = Buffer.concat(content);
+  const header = Buffer.alloc(8);
+  header.writeUInt32BE(8 + body.length, 0);
+  header.write(type, 4, "latin1");
+  return Buffer.concat([header, body]);
+};
+
+/** A minimal MP4: `ftyp` with the given brands, one track with the given handler. */
+export const mp4 = ({
+  brands = ["isom", "isom", "mp42"],
+  handler = "vide",
+}: {
+  brands?: string[];
+  handler?: string;
+} = {}) => {
+  const [major, ...compatible] = brands;
+  const minorVersion = Buffer.alloc(4);
+  const hdlr = Buffer.alloc(24);
+  hdlr.write(handler, 8, "latin1");
+  return Buffer.concat([
+    box(
+      "ftyp",
+      Buffer.from(major, "latin1"),
+      minorVersion,
+      ...compatible.map((brand) => Buffer.from(brand, "latin1"))
+    ),
+    box("moov", box("trak", box("mdia", box("hdlr", hdlr)))),
+    box("mdat", Buffer.alloc(16)),
+  ]);
+};
