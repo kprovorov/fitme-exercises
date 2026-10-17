@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
+import { deviceCache } from "./cache";
 import { exerciseRoutes } from "./routes/exercises";
 import type { ServedLibrary } from "./served-library";
 
@@ -31,6 +32,8 @@ export const createApp = ({ library }: AppDeps) => {
 
   app.openapi(health, (c) => c.json({ ok: true }, 200));
 
+  // Every content route, current and future, lives under /exercises.
+  app.use("/exercises/*", deviceCache(library.hash));
   app.route("/", exerciseRoutes(library));
 
   app.notFound((c) =>

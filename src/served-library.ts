@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { ExerciseLibrary, Media } from "./library/types";
 import type { Exercise } from "./schemas";
 
@@ -13,6 +14,12 @@ const TRAILING_SLASHES = /\/+$/;
 export interface ServedLibrary {
   /** Sorted by Exercise slug. */
   exercises: Exercise[];
+  /**
+   * The sha256 of every Exercise as served (text, muscle groups and media
+   * URLs, which carry the LFS oids): changes whenever any Exercise does.
+   * Devices revalidate with it as the `ETag`.
+   */
+  hash: string;
 }
 
 /**
@@ -33,18 +40,20 @@ export const serveLibrary = (
   supabaseUrl: string
 ): ServedLibrary => {
   const storage = `${supabaseUrl.replace(TRAILING_SLASHES, "")}/storage/v1`;
+  const exercises = library.exercises.map((exercise): Exercise => {
+    const { name, description, instructions } = exercise.locales.en;
+    return {
+      description,
+      instructions,
+      muscle_groups: exercise.muscle_groups,
+      name,
+      slug: exercise.slug,
+      thumbnail_url: `${storage}/render/image/public/${MEDIA_BUCKET}/${mediaObjectPath(exercise.slug, exercise.thumbnail)}`,
+      video_url: `${storage}/object/public/${MEDIA_BUCKET}/${mediaObjectPath(exercise.slug, exercise.video)}`,
+    };
+  });
   return {
-    exercises: library.exercises.map((exercise) => {
-      const { name, description, instructions } = exercise.locales.en;
-      return {
-        description,
-        instructions,
-        muscle_groups: exercise.muscle_groups,
-        name,
-        slug: exercise.slug,
-        thumbnail_url: `${storage}/render/image/public/${MEDIA_BUCKET}/${mediaObjectPath(exercise.slug, exercise.thumbnail)}`,
-        video_url: `${storage}/object/public/${MEDIA_BUCKET}/${mediaObjectPath(exercise.slug, exercise.video)}`,
-      };
-    }),
+    exercises,
+    hash: createHash("sha256").update(JSON.stringify(exercises)).digest("hex"),
   };
 };
