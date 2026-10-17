@@ -361,7 +361,7 @@ const readMediaKind = async (
   if (folder.options.requireLfsPointers && !read.pointer) {
     folder.report(
       file,
-      "committed without Git LFS: run `git lfs install`, then remove and re-add the file"
+      "not a Git LFS pointer: either it was committed without Git LFS (run `git lfs install`, then remove and re-add the file) or its LFS content is checked out (check out with GIT_LFS_SKIP_SMUDGE=1)"
     );
     return;
   }

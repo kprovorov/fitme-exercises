@@ -38,52 +38,13 @@ jobs:
       - name: Lint and format (ultracite)
         run: pnpm check
 
-      - name: Check openapi.json is up to date
-        run: |
-          pnpm openapi
-          if [ -n "$(git status --porcelain -- openapi.json)" ]; then
-            git diff -- openapi.json
-            echo "::error file=openapi.json::openapi.json is stale: run pnpm openapi and commit it"
-            exit 1
-          fi
-
-      # The checks against the base branch run on pull requests only: a
-      # workflow_call (release) has no base branch to compare with.
-      - name: Install oasdiff
-        if: github.event_name == 'pull_request'
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/oasdiff.tar.gz" \
-            "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
-          echo "${OASDIFF_SHA256}  $RUNNER_TEMP/oasdiff.tar.gz" | sha256sum --check
-          tar -xzf "$RUNNER_TEMP/oasdiff.tar.gz" -C "$RUNNER_TEMP" oasdiff
-          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-        env:
-          OASDIFF_VERSION: 1.33.0
-          OASDIFF_SHA256: 43a4e328e2d13ba1552d760aa68d2485c75c5621f309f6ff64ae895188345247
-
-      - name: Check for breaking API changes against the base branch
-        if: github.event_name == 'pull_request'
-        run: scripts/check-api-breaking.sh "origin/$BASE_REF"
-        env:
-          BASE_REF: ${{ github.base_ref }}
-
+      # Runs on pull requests only: a workflow_call (release) has no base
+      # branch to compare with.
       - name: Check no Exercise slug was removed
         if: github.event_name == 'pull_request'
         run: scripts/check-exercise-slugs.sh "origin/$BASE_REF"
         env:
           BASE_REF: ${{ github.base_ref }}
-
-      # Generates the Exercise Library module (typecheck needs it) and bundles
-      # the API. The media URLs don't matter here, so any Supabase URL will do.
-      - name: Build the Exercise Library API
-        run: pnpm build
-        env:
-          SUPABASE_URL: https://ci.supabase.co
-
-      # Vercel's Hono preset rejects an entrypoint without an exact "hono"
-      # import (the regex from @vercel/hono's build).
-      - name: Check the Vercel entrypoint imports hono
-        run: grep -qE "(from|require|import)\s*(\(\s*)?[\"']hono[\"']" dist/app.js
 
       - name: Typecheck
         run: pnpm typecheck
@@ -93,3 +54,7 @@ jobs:
 
       - name: Validate the Exercise Library
         run: pnpm validate --require-lfs-pointers
+
+      # The bundle the release publishes, from the LFS pointers alone.
+      - name: Bundle the Exercise Library
+        run: pnpm bundle

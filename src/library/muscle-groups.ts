@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-/** The source of truth for muscle groups. Every Exercise uses one or more. */
+/**
+ * The muscle groups an Exercise can use (one or more). Mirrors `muscleGroups`
+ * in the monorepo's `@fitme/core`, which is the source of truth: a new muscle
+ * group goes there first, since the API rejects a bundle with a muscle group
+ * it doesn't know. Then add it here.
+ */
 export const muscleGroups = [
   "chest",
   "back",
