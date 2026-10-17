@@ -1,7 +1,12 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
-import { type AuthConfig, type AuthEnv, requireCaller } from "./auth";
+import {
+  type AuthConfig,
+  type AuthEnv,
+  BEARER_AUTH,
+  requireCaller,
+} from "./auth";
 import { deviceCache } from "./cache";
 import { exerciseRoutes } from "./routes/exercises";
 import type { ServedLibrary } from "./served-library";
@@ -38,6 +43,11 @@ export const createApp = ({ auth, library }: AppDeps) => {
 
   // Every route from here on (unknown ones too) needs a caller.
   app.use(requireCaller(auth));
+  app.openAPIRegistry.registerComponent("securitySchemes", BEARER_AUTH, {
+    description: "A Clerk session token, or the Coach's or MCP server's secret",
+    scheme: "bearer",
+    type: "http",
+  });
 
   // Every content route, current and future, lives under /exercises. After
   // auth, so a 304 only ever goes to a caller.

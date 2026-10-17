@@ -24,6 +24,9 @@ export interface AuthEnv {
   Variables: { caller: Caller };
 }
 
+/** The OpenAPI security scheme every content route declares. */
+export const BEARER_AUTH = "bearerAuth";
+
 const BEARER = /^Bearer (\S+)$/i;
 
 // Anything shorter isn't a generated secret (`openssl rand -hex 32` is 64).

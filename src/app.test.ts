@@ -217,6 +217,26 @@ describe("auth", () => {
   });
 });
 
+describe("OpenAPI spec", () => {
+  it("declares bearer auth on every content route, not on /health", () => {
+    const spec = app.getOpenAPIDocument({
+      info: { title: "test", version: "0" },
+      openapi: "3.0.3",
+    });
+
+    expect(spec.components?.securitySchemes).toMatchObject({
+      bearerAuth: { scheme: "bearer", type: "http" },
+    });
+    expect(spec.paths["/exercises"]?.get?.security).toEqual([
+      { bearerAuth: [] },
+    ]);
+    expect(spec.paths["/exercises/{slug}"]?.get?.security).toEqual([
+      { bearerAuth: [] },
+    ]);
+    expect(spec.paths["/health"]?.get?.security).toBeUndefined();
+  });
+});
+
 describe("GET /exercises", () => {
   it("lists every Exercise alphabetically by name, as summaries", async () => {
     const { body, status } = await list();
@@ -493,7 +513,7 @@ describe("GET /exercises?slugs (batch lookup)", () => {
   );
 
   it("lets devices cache a batch, tagged with the library hash", async () => {
-    const response = await listApp.request("/exercises?slugs=squat");
+    const response = await listApp.request("/exercises?slugs=squat", asUser);
 
     expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
     expect(response.headers.get("ETag")).toMatch(LIBRARY_ETAG);

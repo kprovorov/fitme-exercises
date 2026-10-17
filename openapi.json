@@ -10,6 +10,13 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "A Clerk session token, or the Coach's or MCP server's secret",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    },
     "schemas": {
       "ExercisePage": {
         "type": "object",
@@ -220,6 +227,11 @@
     },
     "/exercises": {
       "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "List Exercises, or look up a batch by Exercise slug",
         "parameters": [
           {
@@ -325,6 +337,11 @@
     },
     "/exercises/{slug}": {
       "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Get one Exercise by Exercise slug",
         "parameters": [
           {
