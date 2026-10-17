@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createApp } from "./create-app";
 import { muscleGroups } from "./library/muscle-groups";
 import type { Exercise as LibraryExercise } from "./library/types";
-import type { ExercisePage } from "./schemas";
+import type { ExerciseBatch, ExercisePage } from "./schemas";
 import { serveLibrary } from "./served-library";
 import { fakeOid, libraryExercise } from "./test/fixtures";
 
@@ -259,6 +259,124 @@ describe("GET /exercises pagination", () => {
   it("accepts the limit bounds", async () => {
     expect((await list("?limit=1")).body.data).toHaveLength(1);
     expect((await list("?limit=50")).status).toBe(200);
+  });
+});
+
+const batch = async (slugs: string, rest = "") => {
+  const { body, status } = await list(`?slugs=${slugs}${rest}`);
+  return { body: body as unknown as ExerciseBatch, status };
+};
+
+describe("GET /exercises?slugs (batch lookup)", () => {
+  it("answers known Exercise slugs in request order, as summaries, and lists unknown ones as missing", async () => {
+    const { body, status } = await batch("squat,nope,bench-press,gone");
+
+    expect(status).toBe(200);
+    expect(body.data.map((exercise) => exercise.slug)).toEqual([
+      "squat",
+      "bench-press",
+    ]);
+    expect(body.missing).toEqual(["nope", "gone"]);
+    expect(body.data[0]).toEqual({
+      muscle_groups: ["quadriceps", "glutes"],
+      name: "Back Squat",
+      slug: "squat",
+      thumbnail_url: `https://project.supabase.co/storage/v1/render/image/public/exercise-media/squat/${fakeOid("a")}.png`,
+      video_url: `https://project.supabase.co/storage/v1/object/public/exercise-media/squat/${fakeOid("b")}.mp4`,
+    });
+  });
+
+  it("answers a repeated Exercise slug once, where it first appears", async () => {
+    const { body } = await batch("squat,nope,deadlift,squat,nope");
+
+    expect(body.data.map((exercise) => exercise.slug)).toEqual([
+      "squat",
+      "deadlift",
+    ]);
+    expect(body.missing).toEqual(["nope"]);
+  });
+
+  const slugList = (count: number) =>
+    Array.from({ length: count }, (_, i) => `exercise-${i}`).join(",");
+
+  it("looks up at most 40 Exercise slugs", async () => {
+    expect((await batch(slugList(40))).body.missing).toHaveLength(40);
+  });
+
+  it.each([
+    ["41 Exercise slugs", slugList(41)],
+    ["41 Exercise slugs with a repeat", `${slugList(40)},exercise-0`],
+    ["an empty slugs", ""],
+    ["an empty Exercise slug in the list", "squat,,deadlift"],
+  ])("answers %s with 400 in the error shape", async (_, slugs) => {
+    const { body, status } = await batch(slugs);
+
+    expect(status).toBe(400);
+    expect(body).toEqual({
+      error: { code: "invalid_request", message: expect.any(String) },
+    });
+  });
+
+  it.each([
+    "&search=squat",
+    "&search=",
+    "&muscle_group=quadriceps",
+    "&limit=20",
+    "&offset=0",
+  ])(
+    "answers slugs combined with %s with 400 in the error shape",
+    async (rest) => {
+      const { body, status } = await batch("squat", rest);
+
+      expect(status).toBe(400);
+      expect(body).toEqual({
+        error: { code: "invalid_request", message: expect.any(String) },
+      });
+    }
+  );
+
+  it("lets devices cache a batch, tagged with the library hash", async () => {
+    const response = await listApp.request("/exercises?slugs=squat");
+
+    expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
+    expect(response.headers.get("ETag")).toMatch(LIBRARY_ETAG);
+  });
+
+  it("shows both response shapes of GET /exercises, and slugs as a string, in the OpenAPI definition", () => {
+    const document = listApp.getOpenAPIDocument({
+      info: { title: "Exercise Library API", version: "1" },
+      openapi: "3.1.0",
+    });
+    const get = document.paths["/exercises"]?.get;
+    const parameter = get?.parameters?.find(
+      (p) => "name" in p && p.name === "slugs"
+    );
+    const ok = get?.responses?.["200"];
+
+    expect(parameter).toMatchObject({
+      in: "query",
+      required: false,
+      schema: { type: "string" },
+    });
+    expect(
+      ok && "content" in ok && ok.content?.["application/json"]?.schema
+    ).toEqual({
+      anyOf: [
+        { $ref: "#/components/schemas/ExercisePage" },
+        { $ref: "#/components/schemas/ExerciseBatch" },
+      ],
+    });
+    expect(document.components?.schemas?.ExerciseBatch).toMatchObject({
+      properties: {
+        data: {
+          items: { $ref: "#/components/schemas/ExerciseSummary" },
+          type: "array",
+        },
+        missing: { items: { type: "string" }, type: "array" },
+      },
+      required: ["data", "missing"],
+      type: "object",
+    });
   });
 });
 

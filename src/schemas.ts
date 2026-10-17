@@ -44,9 +44,22 @@ export const ExercisePage = z
   })
   .openapi("ExercisePage");
 
+export const ExerciseBatch = z
+  .object({
+    data: z.array(ExerciseSummary).openapi({
+      description: "The Exercises found, in the order their slugs were asked.",
+    }),
+    missing: z.array(z.string()).openapi({
+      description: "The asked Exercise slugs no Exercise has, in asked order.",
+      example: ["no-such-exercise"],
+    }),
+  })
+  .openapi("ExerciseBatch");
+
 export type ExerciseSummary = z.infer<typeof ExerciseSummary>;
 export type Exercise = z.infer<typeof Exercise>;
 export type ExercisePage = z.infer<typeof ExercisePage>;
+export type ExerciseBatch = z.infer<typeof ExerciseBatch>;
 
 export const ErrorResponse = z
   .object({
