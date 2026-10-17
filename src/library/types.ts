@@ -1,7 +1,7 @@
 import type { MuscleGroup } from "./muscle-groups";
 
-export const locales = ["en"] as const;
-export type Locale = (typeof locales)[number];
+/** Only `en` for now; adding a language adds a locale folder. */
+export type Locale = "en";
 
 export interface Media {
   contentType: string;

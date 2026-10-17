@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
 import { imageSize } from "image-size";
 
 const POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
@@ -8,10 +7,12 @@ const POINTER_PATTERN =
 /** Git LFS pointer files are always smaller than this. */
 const MAX_POINTER_SIZE = 1024;
 
+export type MediaFormat = "image" | "mp4";
+
 export interface MediaFile {
-  /** Pixel dimensions, known only when the file's content is present locally. */
+  /** Pixel dimensions, known only when an image's content is present locally. */
   dimensions?: { width: number; height: number };
-  /** The detected image format (e.g. `png`, `jpg`), only when content is present. */
+  /** The detected image type (`png`, `jpg`, `webp`, …), only when content is present. */
   imageType?: string;
   oid: string;
   size: number;
@@ -29,12 +30,10 @@ export type ReadMediaResult =
  * as-is; from content it is the content's sha256, which is how Git LFS
  * defines the oid.
  */
-export const readMedia = async (
-  path: string,
-  { image }: { image: boolean }
-): Promise<ReadMediaResult> => {
-  const bytes = await readFile(path);
-
+export const readMedia = (
+  bytes: Buffer,
+  format: MediaFormat
+): ReadMediaResult => {
   if (isPointer(bytes)) {
     const match = POINTER_PATTERN.exec(bytes.toString("utf8"));
     if (!match) {
@@ -47,14 +46,19 @@ export const readMedia = async (
     oid: createHash("sha256").update(bytes).digest("hex"),
     size: bytes.length,
   };
-  if (image) {
-    try {
-      const { width, height, type } = imageSize(bytes);
-      media.dimensions = { height, width };
-      media.imageType = type;
-    } catch {
-      return { message: "not a readable image", ok: false };
+  if (format === "mp4") {
+    // Every MP4 starts with an `ftyp` box: a 4-byte size, then "ftyp".
+    if (bytes.subarray(4, 8).toString("latin1") !== "ftyp") {
+      return { message: "not an MP4 video or a Git LFS pointer", ok: false };
     }
+    return { media, ok: true };
+  }
+  try {
+    const { width, height, type } = imageSize(bytes);
+    media.dimensions = { height, width };
+    media.imageType = type;
+  } catch {
+    return { message: "not a readable image or a Git LFS pointer", ok: false };
   }
   return { media, ok: true };
 };

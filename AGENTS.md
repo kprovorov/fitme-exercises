@@ -45,7 +45,7 @@ exercises/
 - Muscle groups must come from `src/library/muscle-groups.ts`, at least one, no repeats.
 - Metadata files are strict: unknown keys are problems. New fields are added to the schema first.
 - Media extensions are lowercase: `thumbnail.jpg` (not `.jpeg` or `.JPG`), `thumbnail.png`, `thumbnail.webp`, `video.mp4`. Exactly one thumbnail and one video per Exercise.
-- Files and folders starting with `.` are ignored. Anything else at the top of `exercises/` that isn't a folder is a problem.
+- Files and folders starting with `.` are ignored. Anything else at the top of `exercises/` that isn't a folder (including a symlink) is a problem.
 
 Every problem names the Exercise and the file, e.g. `bench-press/metadata.json: unknown muscle group "neck"`.
 
@@ -54,8 +54,8 @@ Every problem names the Exercise and the file, e.g. `bench-press/metadata.json: 
 Media (`exercises/**/*.{jpg,png,webp,mp4}`) is tracked with Git LFS (`.gitattributes`). Install Git LFS before adding media (`git lfs install`).
 
 - **Content hash = the Git LFS oid.** With LFS content not downloaded (CI, or `GIT_LFS_SKIP_SMUDGE=1`), each media file in the working tree is a pointer; the loader reads `oid` and `size` from it and never downloads anything. With LFS content downloaded (a normal clone with Git LFS installed), the loader hashes the file with sha256, which is exactly how Git LFS defines the oid, so both give the same value.
-- **Size limits** use the pointer's `size` (or the file size), so they are always checked.
-- **The 50 megapixel limit** needs the image's pixel dimensions, which a pointer doesn't carry. It is checked only when the image's content is present locally: on a content author's machine (where the thumbnail is added) and wherever LFS objects are fetched (the release workflow fetches the objects it uploads). PR CI, which never downloads LFS content, checks it only through the size limit. The same goes for the check that an image's content matches its extension.
+- **Size limits** use the pointer's `size` (or the file size), so they are always checked. 1 MB is 1,000,000 bytes.
+- **The 50 megapixel limit** needs the image's pixel dimensions, which a pointer doesn't carry. It is checked only when the image's content is present locally: on a content author's machine (where the thumbnail is added) and wherever LFS objects are fetched (the release workflow fetches the objects it uploads). PR CI, which never downloads LFS content, checks it only through the size limit. The same goes for the content checks: an image's content must match its extension, and a video must be an MP4.
 - The fixture Exercises in `exercises/` (`example-*`) are made up, with tiny placeholder media. They are not real content and will be replaced by the real pack.
 
 ## Glossary

@@ -1,5 +1,4 @@
-import { createHash } from "node:crypto";
-import { rm } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -11,6 +10,9 @@ import {
   writeFiles,
 } from "../test/fixtures";
 import { loadLibrary } from "./load";
+
+const PNG_640X480_SHA256 =
+  "e0e6fd836f2c429c829e082ee65f96870ef1ac2b9a72f83860398ad2b86c62e6";
 
 let dir: string;
 let cleanup: () => Promise<void>;
@@ -270,12 +272,14 @@ describe("loadLibrary", () => {
       {
         exercise: "bench-press",
         file: "bench-press/thumbnail.png",
-        message: "thumbnail is 25 MB, over the 25 MB limit",
+        message:
+          "thumbnail is 25,000,001 bytes, over the 25 MB (25,000,000 bytes) limit",
       },
       {
         exercise: "bench-press",
         file: "bench-press/video.mp4",
-        message: "video is 20 MB, over the 20 MB limit",
+        message:
+          "video is 20,000,001 bytes, over the 20 MB (20,000,000 bytes) limit",
       },
     ]);
   });
@@ -301,7 +305,7 @@ describe("loadLibrary", () => {
         exercise: "bench-press",
         file: "bench-press/thumbnail.png",
         message:
-          "thumbnail is 10000×5001 (50 megapixels), over the 50 megapixels limit",
+          "thumbnail is 10000×5001 (50,010,000 pixels), over the 50 megapixel (50,000,000 pixels) limit",
       },
     ]);
   });
@@ -348,10 +352,63 @@ describe("loadLibrary", () => {
     expect(result.ok && result.library.exercises[0].thumbnail).toEqual({
       contentType: "image/png",
       extension: "png",
-      oid: createHash("sha256").update(png).digest("hex"),
+      // sha256 of these 33 bytes, computed independently with sha256sum.
+      oid: PNG_640X480_SHA256,
       path: "bench-press/thumbnail.png",
       size: png.length,
     });
+  });
+
+  it("reports downloaded video content that isn't an MP4", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/video.mp4": "not a video",
+    });
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/video.mp4",
+        message: "not an MP4 video or a Git LFS pointer",
+      },
+    ]);
+  });
+
+  it("reports media file names that aren't lowercase", async () => {
+    await writeFiles(dir, prefix("bench-press", exerciseFiles()));
+    await rm(join(dir, "bench-press/video.mp4"));
+    await writeFiles(dir, {
+      "bench-press/Video.MP4": lfsPointer(fakeOid("b"), 100),
+    });
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/Video.MP4",
+        message: "media file names are lowercase: rename to video.mp4",
+      },
+    ]);
+  });
+
+  it("reports a folder where a file belongs", async () => {
+    await writeFiles(dir, prefix("bench-press", exerciseFiles()));
+    await rm(join(dir, "bench-press/thumbnail.png"));
+    await rm(join(dir, "bench-press/en/description.md"));
+    await mkdir(join(dir, "bench-press/thumbnail.png"));
+    await mkdir(join(dir, "bench-press/en/description.md"));
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/en/description.md",
+        message: "expected a file, found a folder",
+      },
+      {
+        exercise: "bench-press",
+        file: "bench-press/thumbnail.png",
+        message: "expected a file, found a folder",
+      },
+    ]);
   });
 
   it("reports files that aren't Exercise folders and ignores dotfiles", async () => {
