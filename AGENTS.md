@@ -37,7 +37,7 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 
 ## The library.json bundle
 
-`pnpm bundle` is how the Exercise Library leaves this repo: the release publishes its output, and `apps/exercises`' build validates it against its own zod schema (`apps/exercises/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
+`pnpm bundle` is how the Exercise Library leaves this repo: the release (every merge to `main`, once FIT-181's release workflow lands) publishes its output, and `apps/exercises`' build validates it against its own zod schema (`apps/exercises/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
 
 ```json
 {
@@ -56,7 +56,7 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 
 - No URLs, sizes or paths: both sides derive a media object's path as `<slug>/<oid>.<ext>`, and the API resolves URLs on its Supabase project.
 - Exercises are sorted by Exercise slug.
-- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
+- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. A release that needs LFS content to upload fetches it into `.git/lfs` (`git lfs fetch`) without checking it out, or bundles first. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
 - A format change touches both repos: the monorepo's schema first (it rejects anything it doesn't know), then `src/library/bundle.ts` here. `src/library/bundle.test.ts` bundles `fixtures/library/` and compares the result with `fixtures/library.json`, a copy of the monorepo's `apps/exercises/fixtures/library.json`: keep the two copies equal.
 
 ## Adding an Exercise
@@ -64,7 +64,7 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 1. `git lfs install` (once per machine).
 2. Add `exercises/<slug>/` as in Content layout: both metadata files, the two markdown files, a thumbnail and a video.
 3. `pnpm validate`: with the media content present, this also checks the thumbnail's pixel limit and decodes both files.
-4. Commit and open a pull request. CI validates it from the pointers; merging it to `main` releases it.
+4. Commit and open a pull request. CI validates it from the pointers. Merging it to `main` is a content release (automated by FIT-181).
 
 ## Content layout
 
@@ -96,7 +96,7 @@ Media (`exercises/**/*.{jpg,png,webp,mp4}`) is tracked with Git LFS (`.gitattrib
 - **Content hash = the Git LFS oid.** With LFS content not downloaded (CI, or `GIT_LFS_SKIP_SMUDGE=1`), each media file in the working tree is a pointer; the loader reads `oid` and `size` from it and never downloads anything. With LFS content downloaded (a normal clone with Git LFS installed), the loader hashes the file with sha256, which is exactly how Git LFS defines the oid, so both give the same value.
 - **Size limits** use the pointer's `size` (or the file size), so they are always checked. 1 MB is 1,000,000 bytes.
 - **The 50 megapixel limit** needs the image's pixel dimensions, which a pointer doesn't carry. It is checked only when the image's content is present locally: on a content author's machine (where the thumbnail is added) and wherever LFS objects are fetched (the release workflow fetches the objects it uploads). PR CI, which never downloads LFS content, checks it only through the size limit. The same goes for the content checks: a thumbnail must decode (sharp) and match its extension, and a video must be a structurally valid MP4 (an MP4 brand in `ftyp`) with a video track that has a sample description and at least one sample (samples are not decoded; fragmented MP4 is not supported).
-- **CI requires pointers.** PR CI runs `pnpm validate --require-lfs-pointers` and `pnpm bundle`: a media file that checks out as content rather than a pointer there was committed without Git LFS, and is a problem.
+- **CI requires pointers.** PR CI runs `pnpm validate --require-lfs-pointers` and `pnpm bundle`: a media file that checks out as content rather than a pointer there was committed without Git LFS, and is a problem. Locally the same problem means LFS content is checked out.
 - Exercise folders are loaded one at a time, so downloaded media (up to 45 MB per Exercise) never piles up in memory.
 - The fixture Exercises in `exercises/` (`example-*`) are made up, with tiny placeholder media. They are not real content and will be replaced by the real pack.
 
