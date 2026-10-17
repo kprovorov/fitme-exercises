@@ -35,6 +35,13 @@ jobs:
       - name: Lint and format (ultracite)
         run: pnpm check
 
+      # Generates the Exercise Library module (typecheck needs it) and bundles
+      # the API. The media URLs don't matter here, so any Supabase URL will do.
+      - name: Build the Exercise Library API
+        run: pnpm build
+        env:
+          SUPABASE_URL: https://ci.supabase.co
+
       - name: Typecheck
         run: pnpm typecheck
 

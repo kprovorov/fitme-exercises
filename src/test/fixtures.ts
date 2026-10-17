@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import type { Exercise } from "../library/types";
 
 export const lfsPointer = (oid: string, size: number) =>
   `version https://git-lfs.github.com/spec/v1\noid sha256:${oid}\nsize ${size}\n`;
@@ -18,6 +19,42 @@ export const exerciseFiles = (
   "thumbnail.png": lfsPointer(fakeOid("a"), 2048),
   "video.mp4": lfsPointer(fakeOid("b"), 4096),
 });
+
+/** A loaded Exercise, as the loader returns it for `exerciseFiles(name)` in `<slug>/`. */
+export const libraryExercise = (slug: string, name: string): Exercise => ({
+  locales: {
+    en: {
+      description: `${name} is a compound pushing movement.\n`,
+      instructions: "1. Lie on the bench.\n2. Press.\n",
+      name,
+    },
+  },
+  muscle_groups: ["chest", "triceps"],
+  slug,
+  thumbnail: {
+    contentType: "image/png",
+    extension: "png",
+    oid: fakeOid("a"),
+    path: `${slug}/thumbnail.png`,
+    size: 2048,
+  },
+  video: {
+    contentType: "video/mp4",
+    extension: "mp4",
+    oid: fakeOid("b"),
+    path: `${slug}/video.mp4`,
+    size: 4096,
+  },
+});
+
+/** Puts an Exercise folder's files under `<slug>/`. */
+export const prefix = (
+  slug: string,
+  files: Record<string, string | Uint8Array>
+) =>
+  Object.fromEntries(
+    Object.entries(files).map(([path, content]) => [`${slug}/${path}`, content])
+  );
 
 export const writeFiles = async (
   root: string,

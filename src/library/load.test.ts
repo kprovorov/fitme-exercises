@@ -8,6 +8,7 @@ import {
   makeLibraryDir,
   mp4,
   pngHeader,
+  prefix,
   TINY_PNG,
   writeFiles,
 } from "../test/fixtures";
@@ -642,10 +643,4 @@ async function problems() {
     throw new Error("expected problems, got a valid Exercise Library");
   }
   return result.problems;
-}
-
-function prefix(slug: string, files: Record<string, string | Uint8Array>) {
-  return Object.fromEntries(
-    Object.entries(files).map(([path, content]) => [`${slug}/${path}`, content])
-  );
 }
