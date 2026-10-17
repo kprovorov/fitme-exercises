@@ -9,7 +9,9 @@ import { createApp } from "./create-app";
  * is stale or has a breaking change against the base branch.
  */
 const out = resolve(import.meta.dirname, "../openapi.json");
-const spec = createApp({ library: { exercises: [] } }).getOpenAPIDocument({
+const spec = createApp({
+  library: { exercises: [], hash: "" },
+}).getOpenAPIDocument({
   info: { title: "Exercise Library API", version: "1.0.0" },
   openapi: "3.0.3",
   servers: [{ url: "https://exercises.fitmeproject.com" }],
