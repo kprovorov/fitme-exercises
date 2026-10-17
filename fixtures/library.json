@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "exercises": [
+    {
+      "slug": "example-press",
+      "muscle_groups": ["chest", "triceps"],
+      "locales": {
+        "en": {
+          "name": "Example Press",
+          "description": "Example Press is a made-up fixture Exercise for the Exercise Library loader. It is not real content.\n",
+          "instructions": "1. This is placeholder text.\n2. Replace fixture Exercises with the real pack.\n"
+        }
+      },
+      "thumbnail": {
+        "oid": "a094fbdc3ac9753cc724bf11a68ac9ad12c72ac792b8ce6f874cdfdb52964189",
+        "extension": "png"
+      },
+      "video": {
+        "oid": "501e214e8b9ebbd15726e2f0ebba3b49419491eccf2a7127ae59b1c459b814d3",
+        "extension": "mp4"
+      }
+    },
+    {
+      "slug": "example-row",
+      "muscle_groups": ["back", "biceps"],
+      "locales": {
+        "en": {
+          "name": "Example Row",
+          "description": "Example Row is a made-up fixture Exercise for the Exercise Library loader. It is not real content.\n",
+          "instructions": "1. This is placeholder text.\n2. Replace fixture Exercises with the real pack.\n"
+        }
+      },
+      "thumbnail": {
+        "oid": "e169a9d14634ab3e685dde320a22edc2af45592d976e44d58685071557740c54",
+        "extension": "jpg"
+      },
+      "video": {
+        "oid": "be41d47ef26c67c71504c23d26bac914e45af0bc165bbbadd25c290e056a59ed",
+        "extension": "mp4"
+      }
+    },
+    {
+      "slug": "example-squat",
+      "muscle_groups": ["quadriceps", "glutes"],
+      "locales": {
+        "en": {
+          "name": "Example Squat",
+          "description": "Example Squat is a made-up fixture Exercise for the Exercise Library loader. It is not real content.\n",
+          "instructions": "1. This is placeholder text.\n2. Replace fixture Exercises with the real pack.\n"
+        }
+      },
+      "thumbnail": {
+        "oid": "6c99e770865c5777e6a8f08d609197ec063419da472fbc4cd423ee40eba824b7",
+        "extension": "webp"
+      },
+      "video": {
+        "oid": "0d3ff51a97a77f721818b6d2561a0c93e6b2fffde032739dce8900bf7684b959",
+        "extension": "mp4"
+      }
+    }
+  ]
+}

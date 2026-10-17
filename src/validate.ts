@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { loadLibrary } from "./library/load";
+import { reportProblems } from "./report";
 
 /**
  * Validates the Exercise Library: `pnpm validate [dir] [--require-lfs-pointers]`
@@ -24,12 +25,6 @@ if (result.ok) {
     `valid: the Exercise Library has ${count} Exercise${count === 1 ? "" : "s"}`
   );
 } else {
-  const count = result.problems.length;
-  console.error(`invalid: ${count} problem${count === 1 ? "" : "s"} found\n`);
-  for (const problem of result.problems) {
-    console.error(
-      `  ${problem.exercise}  ${problem.file}\n    ${problem.message}`
-    );
-  }
+  reportProblems(result.problems);
   process.exitCode = 1;
 }
