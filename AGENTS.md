@@ -43,7 +43,7 @@ pnpm dev                 # generate, then serve the API on http://localhost:3005
 pnpm build               # generate, then bundle with tsdown → dist/ (dist/app.js for Vercel)
 pnpm start               # run dist/node/index.js
 pnpm openapi             # regenerate openapi.json (commit it with any API change)
-scripts/check-api-breaking.sh [base-ref]    # as CI (needs oasdiff); default base origin/main
+scripts/check-api-breaking.sh [base-ref]    # as CI (needs oasdiff and jq); default base origin/main
 scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 ```
 
@@ -65,9 +65,9 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 `openapi.json` is generated from the zod-openapi route definitions by `pnpm openapi` and committed; it isn't served. PR CI fails when:
 
 - **It's stale:** regenerating it changes it. Run `pnpm openapi` and commit the result with every API change.
-- **It breaks the contract:** oasdiff compares it with the base branch's and fails on any breaking change, error or warning: a removed or renamed route, response field or parameter, a narrowed type, a new required parameter. Installed app builds read this API and there's no version prefix, so changes are additive only. New optional parameters, new routes and new response fields are fine. A new muscle group (a new response enum value) is only info (`.github/oasdiff/severity-levels.txt`): clients must tolerate muscle groups they don't know.
+- **It breaks the contract:** oasdiff compares it with the base branch's and fails on any breaking change, error or warning: a removed or renamed route, response field or parameter, a narrowed type, a new required parameter. Installed app builds read this API and there's no version prefix, so changes are additive only. Every removal counts, including an optional response field and anything deprecated first (`.github/oasdiff/severity-levels.txt` raises those to warnings). New optional parameters, new routes and new response fields are fine. A new muscle group (a new value of the `muscle_groups` response enum) is the one allowed enum addition: clients must tolerate muscle groups they don't know. Any other response enum stays closed.
 
-**Deliberate removal (the override).** A field, parameter or route is removed only after the app's minimum version gate has cut off every build that reads it. Then, in the removal PR, copy each oasdiff error or warning into `.github/oasdiff/allowed-breaking-changes.txt` as one line, `<METHOD> <path> <message>`, e.g. ``GET /exercises/{slug} removed the required property `video_url` from the response with the `200` status``. The line allows exactly that change, and is reviewed with the PR: say which minimum app version made it safe. Never add a line to get an unplanned change through, and never loosen the check another way. Empty the file again in a later PR once the removal is on `main`.
+**Deliberate removal (the override).** A field, parameter or route is removed only after the app's minimum version gate has cut off every build that reads it. Then, in the removal PR, copy each line the check prints (without the trailing `[check id]`) into `.github/oasdiff/allowed-breaking-changes.txt`: `<METHOD> <path> <message>`, e.g. ``GET /exercises/{slug} removed the required property `video_url` from the response with the `200` status``. The line allows exactly that change, and is reviewed with the PR: say which minimum app version made it safe. Never add a line to get an unplanned change through, and never loosen the check another way. Empty the file again in a later PR once the removal is on `main`.
 
 ## Content layout
 
