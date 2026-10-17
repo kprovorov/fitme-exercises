@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { extname, join } from "node:path";
 import type { z } from "zod";
 import { type MediaFormat, readMedia } from "./media";
@@ -236,11 +236,12 @@ const readMarkdown = async (folder: Folder, file: string) => {
   return text;
 };
 
-const readMediaKind = async (
+/** Finds the one media file of `kind` in the folder, with an allowed, lowercase name. */
+const findMediaFile = (
   folder: Folder,
   files: string[],
   kind: MediaKind
-): Promise<Media | undefined> => {
+): { file: string; extension: string; contentType: string } | undefined => {
   const allowed = Object.keys(kind.contentTypes);
   const candidates = files.filter(
     (name) =>
@@ -280,6 +281,27 @@ const readMediaKind = async (
     );
     return;
   }
+  return { contentType, extension, file };
+};
+
+const readMediaKind = async (
+  folder: Folder,
+  files: string[],
+  kind: MediaKind
+): Promise<Media | undefined> => {
+  const found = findMediaFile(folder, files, kind);
+  if (!found) {
+    return;
+  }
+  const { file, extension, contentType } = found;
+
+  // Check the size before reading: an oversized file is never a pointer, so
+  // it's downloaded content that needn't be loaded into memory.
+  const stats = await stat(join(folder.dir, file));
+  if (stats.isFile() && stats.size > kind.maxSize) {
+    reportOversized(folder, file, kind, stats.size);
+    return;
+  }
 
   const bytes = await readFolderFile(folder, file);
   if (!bytes) {
@@ -301,10 +323,7 @@ const readMediaKind = async (
 
   let valid = true;
   if (size > kind.maxSize) {
-    folder.report(
-      file,
-      `${kind.name} is ${formatCount(size)} bytes, over the ${kind.maxSize / MB} MB (${formatCount(kind.maxSize)} bytes) limit`
-    );
+    reportOversized(folder, file, kind, size);
     valid = false;
   }
   if (imageType && imageType !== extension) {
@@ -336,5 +355,16 @@ const readMediaKind = async (
     size,
   };
 };
+
+const reportOversized = (
+  folder: Folder,
+  file: string,
+  kind: MediaKind,
+  size: number
+) =>
+  folder.report(
+    file,
+    `${kind.name} is ${formatCount(size)} bytes, over the ${kind.maxSize / MB} MB (${formatCount(kind.maxSize)} bytes) limit`
+  );
 
 const formatCount = (count: number) => count.toLocaleString("en-US");

@@ -287,6 +287,22 @@ describe("loadLibrary", () => {
     ]);
   });
 
+  it("reports oversized downloaded content", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/video.mp4": Buffer.alloc(20_000_001),
+    });
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "bench-press",
+        file: "bench-press/video.mp4",
+        message:
+          "video is 20,000,001 bytes, over the 20 MB (20,000,000 bytes) limit",
+      },
+    ]);
+  });
+
   it("accepts media exactly at the size limits", async () => {
     await writeFiles(dir, {
       ...prefix("bench-press", exerciseFiles()),
