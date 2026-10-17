@@ -103,7 +103,7 @@ describe("GET /exercises search", () => {
   });
 
   it("treats % and _ as literal characters", async () => {
-    const percent = createApp({
+    const wildcardApp = createApp({
       library: serveLibrary(
         {
           exercises: [
@@ -118,7 +118,9 @@ describe("GET /exercises search", () => {
     const search = async (term: string) =>
       names(
         (await (
-          await percent.request(`/exercises?search=${encodeURIComponent(term)}`)
+          await wildcardApp.request(
+            `/exercises?search=${encodeURIComponent(term)}`
+          )
         ).json()) as ExercisePage
       );
 
@@ -126,6 +128,19 @@ describe("GET /exercises search", () => {
     expect(await search("_")).toEqual(["Snake_Walk"]);
     expect(await search("e_w")).toEqual(["Snake_Walk"]);
     expect(await search("b%s")).toEqual([]);
+  });
+
+  it("ignores surrounding whitespace, and lists everything for a blank search", async () => {
+    expect(names((await list("?search=%20press%20")).body)).toEqual([
+      "Bench Press",
+    ]);
+    expect((await list("?search=%20%20")).body.total).toBe(5);
+  });
+
+  it("answers a search over 100 characters with 400", async () => {
+    const { status } = await list(`?search=${"a".repeat(101)}`);
+
+    expect(status).toBe(400);
   });
 
   it("answers no match with an empty page", async () => {

@@ -24,8 +24,9 @@ export type GenerateResult =
 /**
  * Loads and validates the Exercise Library at `root` and turns it into the
  * source of a TypeScript module the API imports: every Exercise with its
- * media URLs resolved on the Supabase project at `supabaseUrl`. An invalid
- * Exercise Library (or URL) gives problems instead, so the build fails.
+ * media URLs resolved on the Supabase project at `supabaseUrl`, and the
+ * lowercased name index search runs on. An invalid Exercise Library (or URL)
+ * gives problems instead, so the build fails.
  */
 export const generateLibraryModule = async ({
   root,

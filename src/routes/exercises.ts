@@ -1,10 +1,17 @@
 import { createRoute, type Hook, OpenAPIHono, z } from "@hono/zod-openapi";
 import type { Env } from "hono";
-import { ErrorResponse, Exercise, ExercisePage, MuscleGroup } from "../schemas";
+import {
+  ErrorResponse,
+  Exercise,
+  ExercisePage,
+  ExerciseSummary,
+  MuscleGroup,
+} from "../schemas";
 import type { ServedLibrary } from "../served-library";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+const MAX_SEARCH = 100;
 
 const listExercises = createRoute({
   method: "get",
@@ -35,9 +42,9 @@ const listExercises = createRoute({
           minimum: 0,
           type: "integer",
         }),
-      search: z.string().optional().openapi({
+      search: z.string().trim().max(MAX_SEARCH).optional().openapi({
         description:
-          "Case-insensitive substring of the name; `%` and `_` match only themselves.",
+          "Case-insensitive substring of the name, surrounding whitespace ignored; `%` and `_` match only themselves.",
         example: "bench",
       }),
     }),
@@ -90,8 +97,9 @@ export const exerciseRoutes = (library: ServedLibrary) => {
   const bySlug = new Map(
     library.exercises.map((exercise) => [exercise.slug, exercise])
   );
-  const summaries = library.exercises.map(
-    ({ description: _, instructions: __, ...summary }) => summary
+  // parsing strips every field ExerciseSummary doesn't define
+  const summaries = library.exercises.map((exercise) =>
+    ExerciseSummary.parse(exercise)
   );
 
   return new OpenAPIHono({ defaultHook: invalidRequest })
