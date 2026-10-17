@@ -22,7 +22,11 @@ src/schemas.ts            zod-openapi response schemas: the one field definition
 src/create-app.ts         createApp({ library }): the Hono app (routes in src/routes/), JSON 404/500 handlers
 src/app.ts                default export createApp() with the generated library: Vercel's entrypoint
 src/index.ts              Node server (pnpm dev, pnpm start)
-.github/workflows/ci.yml  PR CI: lint, typecheck, tests, validation (no LFS download)
+src/openapi.ts            pnpm openapi: writes openapi.json, the committed OpenAPI spec (not served)
+scripts/check-api-breaking.sh  PR CI: oasdiff breaking-change check of openapi.json against the base branch
+scripts/check-exercise-slugs.sh  PR CI: fails when an Exercise folder on the base branch is deleted or renamed
+.github/oasdiff/          oasdiff config: severity-levels.txt, allowed-breaking-changes.txt (the override)
+.github/workflows/ci.yml  PR CI: lint, API contract, slugs, typecheck, tests, validation (no LFS download)
 ```
 
 ## Commands
@@ -38,6 +42,9 @@ pnpm validate --require-lfs-pointers  # as CI: every media file must be an LFS p
 pnpm dev                 # generate, then serve the API on http://localhost:3005 (tsx watch)
 pnpm build               # generate, then bundle with tsdown → dist/ (dist/app.js for Vercel)
 pnpm start               # run dist/node/index.js
+pnpm openapi             # regenerate openapi.json (commit it with any API change)
+scripts/check-api-breaking.sh [base-ref]    # as CI (needs oasdiff and jq); default base origin/main
+scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 ```
 
 `pnpm generate` (run by `pnpm dev` and `pnpm build`) needs `SUPABASE_URL`, the https URL of the Supabase project whose `exercise-media` bucket holds the media; put it in `.env.local` (see `.env.example`). It fails on an invalid Exercise Library. Re-run it (or restart `pnpm dev`) after changing content: the API never reads `exercises/` at runtime.
@@ -50,8 +57,17 @@ pnpm start               # run dist/node/index.js
 - Errors are `{ error: { code, message } }`, like the monorepo's `apps/api`.
 - Caching: every successful content response (everything under `/exercises`) carries `Cache-Control: private, max-age=3600` and `ETag: "<library hash>"`, the sha256 of every Exercise as served, so any change to text, muscle groups or media changes it. A matching `If-None-Match` answers `304` with no body. Errors and `/health` carry neither. Add content routes under `/exercises` so they're covered. The ETag only changes with the library, so every response body must be derived from `ServedLibrary`: a code-only change to an existing response's shape would be served stale to devices through `304`. Add fields through `serveLibrary` (and `src/schemas.ts`).
 - `thumbnail_url` is Supabase's image transformation (render) endpoint for the object: clients append `width`/`height`. `video_url` is the public object URL. Both are built from the LFS oid, so a URL changes whenever the content does.
-- Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix).
+- Response fields are defined once in `src/schemas.ts`; add a field there. Changes are additive only (no version prefix): see API contract.
 - Tests drive `createApp` through `app.request` with fixture Exercises (`src/app.test.ts`).
+
+## API contract
+
+`openapi.json` is generated from the zod-openapi route definitions by `pnpm openapi` and committed; it isn't served. PR CI fails when:
+
+- **It's stale:** regenerating it changes it. Run `pnpm openapi` and commit the result with every API change.
+- **It breaks the contract:** oasdiff compares it with the base branch's and fails on any breaking change, error or warning: a removed or renamed route, response field or parameter, a narrowed type, a new required parameter. Installed app builds read this API and there's no version prefix, so changes are additive only. Every removal counts, including an optional response field and anything deprecated first (`.github/oasdiff/severity-levels.txt` raises those to warnings). New optional parameters, new routes and new response fields are fine. A new muscle group (a new value of the `muscle_groups` response enum) is the one allowed enum addition: clients must tolerate muscle groups they don't know. Any other response enum stays closed.
+
+**Deliberate removal (the override).** A field, parameter or route is removed only after the app's minimum version gate has cut off every build that reads it. Then, in the removal PR, copy each line the check prints (without the trailing `[check id]`) into `.github/oasdiff/allowed-breaking-changes.txt`: `<METHOD> <path> <message>`, e.g. ``GET /exercises/{slug} removed the required property `video_url` from the response with the `200` status``. The line allows exactly that change, and is reviewed with the PR: say which minimum app version made it safe. Never add a line to get an unplanned change through, and never loosen the check another way. Empty the file again in a later PR once the removal is on `main`.
 
 ## Content layout
 
@@ -67,7 +83,7 @@ exercises/
     video.mp4                  mp4; at most 20 MB (Git LFS)
 ```
 
-- **Exercise slug rules:** the folder name is the Exercise slug. It matches `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase letters and digits, words joined by single hyphens, no leading, trailing or doubled hyphens. It is permanent: never rename or delete an Exercise folder (Plans and Workout Sessions refer to it). Change the display name in `en/metadata.json` instead.
+- **Exercise slug rules:** the folder name is the Exercise slug. It matches `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase letters and digits, words joined by single hyphens, no leading, trailing or doubled hyphens. It is permanent: never rename or delete an Exercise folder (Plans and Workout Sessions refer to it). PR CI fails when an Exercise folder present on the base branch is deleted or renamed, listing the missing Exercise slugs; there is no override. Change the display name in `en/metadata.json` instead.
 - Muscle groups must come from `src/library/muscle-groups.ts`, at least one, no repeats.
 - Metadata and markdown files must be valid UTF-8. Metadata files are strict: unknown keys are problems. New fields are added to the schema first.
 - Media extensions are lowercase: `thumbnail.jpg` (not `.jpeg` or `.JPG`), `thumbnail.png`, `thumbnail.webp`, `video.mp4`. Exactly one thumbnail and one video per Exercise.

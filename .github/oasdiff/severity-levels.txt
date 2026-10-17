@@ -1,0 +1,6 @@
+response-optional-property-removed warn
+api-path-removed-with-deprecation warn
+api-removed-with-deprecation warn
+request-parameter-removed-with-deprecation warn
+optional-response-header-removed warn
+response-non-success-status-removed warn
