@@ -30,7 +30,7 @@ const importModule = async (source: string) => {
 };
 
 describe("generateLibraryModule", () => {
-  it("generates a module holding every Exercise with its media URLs", async () => {
+  it("generates a module holding every Exercise with its media URLs and the search index", async () => {
     await writeFiles(join(dir, "exercises"), {
       ...prefix("squat", exerciseFiles("Squat")),
     });
@@ -55,6 +55,7 @@ describe("generateLibraryModule", () => {
         },
       ],
       hash: expect.stringMatching(/^[0-9a-f]{64}$/),
+      searchNames: ["squat"],
     });
   });
 
