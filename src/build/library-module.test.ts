@@ -84,6 +84,10 @@ describe("generateLibraryModule", () => {
     ["missing", undefined],
     ["not a URL", "project.supabase.co"],
     ["not https", "http://project.supabase.co"],
+    ["not an origin (path)", "https://project.supabase.co/rest"],
+    ["not an origin (query)", "https://project.supabase.co?x=1"],
+    ["not an origin (fragment)", "https://project.supabase.co#x"],
+    ["not an origin (credentials)", "https://user:pass@project.supabase.co"],
   ])("fails when the Supabase URL is %s", async (_, supabaseUrl) => {
     await writeFiles(join(dir, "exercises"), {
       ...prefix("squat", exerciseFiles("Squat")),

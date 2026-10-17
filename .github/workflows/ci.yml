@@ -42,6 +42,11 @@ jobs:
         env:
           SUPABASE_URL: https://ci.supabase.co
 
+      # Vercel's Hono preset rejects an entrypoint without an exact "hono"
+      # import (the regex from @vercel/hono's build).
+      - name: Check the Vercel entrypoint imports hono
+        run: grep -qE "(from|require|import)\s*(\(\s*)?[\"']hono[\"']" dist/app.js
+
       - name: Typecheck
         run: pnpm typecheck
 

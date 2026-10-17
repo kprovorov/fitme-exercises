@@ -2,10 +2,20 @@ import { z } from "zod";
 import { loadLibrary } from "../library/load";
 import { serveLibrary } from "../served-library";
 
-const SupabaseUrl = z.url({
-  error: "must be the https URL of the Supabase project, e.g. https://<project>.supabase.co",
-  protocol: /^https$/,
-});
+const URL_PROBLEM =
+  "must be the https URL of the Supabase project, e.g. https://<project>.supabase.co";
+
+/**
+ * The project's https origin: media URLs are appended to it, so no path,
+ * query, fragment or credentials may follow.
+ */
+const SupabaseUrl = z
+  .string({ error: URL_PROBLEM })
+  .refine((value) => {
+    const url = URL.parse(value);
+    return url?.protocol === "https:" && url.href === `${url.origin}/`;
+  }, URL_PROBLEM)
+  .transform((value) => new URL(value).origin);
 
 export type GenerateResult =
   | { ok: true; source: string }
