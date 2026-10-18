@@ -7,12 +7,15 @@
     "bundle": "tsx src/bundle.ts",
     "check": "ultracite check",
     "fix": "ultracite fix",
+    "release": "tsx src/release.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate": "tsx src/validate.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1152.0",
+    "@vercel/blob": "^2.8.2",
     "image-size": "^2.0.4",
     "sharp": "^0.35.5",
     "zod": "4.6.7"

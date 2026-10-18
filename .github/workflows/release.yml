@@ -1,0 +1,112 @@
+name: Release
+
+# Every merge to main is a content release, strictly in order: validate, upload
+# the new media, publish library.json, redeploy apps/exercises. A live
+# deployment never points at media that isn't uploaded. Any failing step stops
+# the release; a re-run is safe (uploaded objects are skipped, and the bundle
+# and the deploy hook are idempotent).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# One release at a time, never cancelled halfway.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # Lint, typecheck, tests, validation and bundle, as on pull requests.
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: ci
+    runs-on: ubuntu-24.04
+    env:
+      # Check out LFS pointers only: the planned objects are pulled below.
+      GIT_LFS_SKIP_SMUDGE: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          lfs: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Validates the Exercise Library again (bundling runs the loader). Runs
+      # before any LFS content is checked out: bundling reads only pointers.
+      - name: Bundle the Exercise Library
+        run: pnpm bundle
+
+      - name: Plan the media upload
+        id: plan
+        run: pnpm release plan
+        env:
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_REGION: ${{ secrets.SUPABASE_S3_REGION }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+
+      # Only the planned files: an empty --include would pull every object.
+      - name: Download the planned LFS objects
+        if: steps.plan.outputs.count != '0'
+        run: git lfs pull --include "$INCLUDE"
+        env:
+          INCLUDE: ${{ steps.plan.outputs.include }}
+
+      # With their content present, the new media also gets the checks a
+      # pointer can't carry: the thumbnail's pixel limit and decoding both files.
+      - name: Validate the new media's content
+        if: steps.plan.outputs.count != '0'
+        run: pnpm validate
+
+      - name: Upload new media
+        if: steps.plan.outputs.count != '0'
+        run: pnpm release upload
+        env:
+          SUPABASE_S3_ENDPOINT: ${{ secrets.SUPABASE_S3_ENDPOINT }}
+          SUPABASE_S3_REGION: ${{ secrets.SUPABASE_S3_REGION }}
+          SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
+          SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
+
+      # A re-run of an older release must not publish its bundle over a newer
+      # release's.
+      - name: Check the release is main's head
+        run: |
+          git fetch --quiet --depth=1 origin main
+          head=$(git rev-parse FETCH_HEAD)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "::error::$GITHUB_SHA is no longer main's head ($head): the newer release publishes instead"
+            exit 1
+          fi
+
+      - name: Publish library.json
+        run: pnpm release publish
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+
+      # Vercel rebuilds the monorepo's main, which bakes in the new bundle.
+      - name: Redeploy apps/exercises
+        # The hook only queues the build (a PENDING job); its outcome is in
+        # Vercel. Watching it would need a Vercel token, which this repo
+        # doesn't hold.
+        run: |
+          response=$(curl --fail-with-body --silent --show-error --request POST "$EXERCISES_DEPLOY_HOOK_URL")
+          echo "$response"
+          echo "$response" | jq --exit-status '.job.id' > /dev/null
+        env:
+          EXERCISES_DEPLOY_HOOK_URL: ${{ secrets.EXERCISES_DEPLOY_HOOK_URL }}
