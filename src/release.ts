@@ -29,8 +29,8 @@ import { reportProblems } from "./report";
  */
 const ROOT = resolve(import.meta.dirname, "..");
 const LIBRARY_DIR = "exercises";
-const PLAN = resolve(ROOT, "dist/upload-plan.json");
-const BUNDLE = resolve(ROOT, "dist/library.json");
+const PLAN_PATH = resolve(ROOT, "dist/upload-plan.json");
+const BUNDLE_PATH = resolve(ROOT, "dist/library.json");
 /** The public Supabase Storage bucket media is served from. */
 const MEDIA_BUCKET = "exercise-media";
 /** The pathname `apps/exercises`' build reads the bundle from. */
@@ -86,8 +86,8 @@ const planStep = async () => {
   );
   const uploads = planUploads(media, await listKeys(s3Client()));
 
-  await mkdir(dirname(PLAN), { recursive: true });
-  await writeFile(PLAN, `${JSON.stringify(uploads, null, 2)}\n`);
+  await mkdir(dirname(PLAN_PATH), { recursive: true });
+  await writeFile(PLAN_PATH, `${JSON.stringify(uploads, null, 2)}\n`);
   console.log(
     `${uploads.length} of ${media.length} media objects to upload${uploads.map((upload) => `\n  ${upload.key}`).join("")}`
   );
@@ -103,7 +103,9 @@ const planStep = async () => {
 };
 
 const uploadStep = async () => {
-  const uploads: PlannedUpload[] = JSON.parse(await readFile(PLAN, "utf8"));
+  const uploads: PlannedUpload[] = JSON.parse(
+    await readFile(PLAN_PATH, "utf8")
+  );
   const client = s3Client();
   // One at a time, so at most one media file is in memory.
   for (const planned of uploads) {
@@ -130,7 +132,7 @@ const uploadStep = async () => {
 };
 
 const publishStep = async () => {
-  const blob = await put(LIBRARY_BLOB, await readFile(BUNDLE), {
+  const blob = await put(LIBRARY_BLOB, await readFile(BUNDLE_PATH), {
     access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,

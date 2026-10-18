@@ -1,13 +1,10 @@
-/** A media file of the Exercise Library, as the release uploads it. */
-export interface ReleaseMedia {
-  contentType: string;
-  extension: string;
-  /** The Git LFS object id: the sha256 of the file's content. */
-  oid: string;
-  /** Path relative to the Exercise Library root, e.g. `bench-press/video.mp4`. */
-  path: string;
-  slug: string;
-}
+import type { Media } from "./types";
+
+/** A media file of the Exercise Library, with the Exercise slug it belongs to. */
+export type ReleaseMedia = Pick<
+  Media,
+  "contentType" | "extension" | "oid" | "path"
+> & { slug: string };
 
 /** An object the release uploads to the `exercise-media` bucket. */
 export interface PlannedUpload {

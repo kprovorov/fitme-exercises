@@ -28,7 +28,7 @@ describe("planUploads", () => {
   it("plans nothing when every object is already in the bucket", () => {
     const plan = planUploads(
       [benchPressThumbnail, benchPressVideo],
-      [`bench-press/${"a".repeat(64)}.png`, `bench-press/${"b".repeat(64)}.mp4`]
+      [`bench-press/${fakeOid("a")}.png`, `bench-press/${fakeOid("b")}.mp4`]
     );
 
     expect(plan).toEqual([]);
@@ -37,12 +37,12 @@ describe("planUploads", () => {
   it("plans only the objects missing from the bucket", () => {
     const plan = planUploads(
       [benchPressThumbnail, benchPressVideo, squatThumbnail],
-      [`bench-press/${"a".repeat(64)}.png`, "unrelated/object.png"]
+      [`bench-press/${fakeOid("a")}.png`, "unrelated/object.png"]
     );
 
     expect(plan.map((upload) => upload.key)).toEqual([
-      `bench-press/${"b".repeat(64)}.mp4`,
-      `squat/${"c".repeat(64)}.webp`,
+      `bench-press/${fakeOid("b")}.mp4`,
+      `squat/${fakeOid("c")}.webp`,
     ]);
   });
 
@@ -53,15 +53,15 @@ describe("planUploads", () => {
       {
         cacheControl: "public, max-age=31536000, immutable",
         contentType: "video/mp4",
-        key: `bench-press/${"b".repeat(64)}.mp4`,
-        oid: "b".repeat(64),
+        key: `bench-press/${fakeOid("b")}.mp4`,
+        oid: fakeOid("b"),
         path: "bench-press/video.mp4",
       },
       {
         cacheControl: "public, max-age=31536000, immutable",
         contentType: "image/webp",
-        key: `squat/${"c".repeat(64)}.webp`,
-        oid: "c".repeat(64),
+        key: `squat/${fakeOid("c")}.webp`,
+        oid: fakeOid("c"),
         path: "squat/thumbnail.webp",
       },
     ]);
@@ -77,11 +77,11 @@ describe("planUploads", () => {
           slug: "incline",
         },
       ],
-      [`bench-press/${"a".repeat(64)}.png`]
+      [`bench-press/${fakeOid("a")}.png`]
     );
 
     expect(plan.map((upload) => upload.key)).toEqual([
-      `incline/${"a".repeat(64)}.png`,
+      `incline/${fakeOid("a")}.png`,
     ]);
   });
 });

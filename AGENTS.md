@@ -14,7 +14,7 @@ src/library/media.ts      reads a media file: a Git LFS pointer (oid, size) or d
 src/library/mp4.ts        checks an MP4's box structure, brand and video track
 src/library/schema.ts     zod schemas for the metadata files
 src/library/muscle-groups.ts  the muscle group enum, mirroring @fitme/core
-src/library/upload-plan.ts   planUploads(media, keys): the media objects a release uploads (pure)
+src/library/upload-plan.ts   planUploads(media, existingKeys): the media objects a release uploads (pure)
 src/validate.ts           pnpm validate: runs the loader and prints "valid" or every problem
 src/bundle.ts             pnpm bundle: writes library.json
 src/release.ts            pnpm release plan|upload|publish: the release's S3 and Blob steps
@@ -72,20 +72,20 @@ pnpm release plan|upload|publish  # the release's steps; only the release workfl
 
 ## Releases
 
-Merging a pull request to `main` is a content release. `.github/workflows/release.yml` runs it, one release at a time (a `concurrency` group that never cancels a running release), strictly in this order, so a live deployment never points at media that isn't uploaded:
+Merging a pull request to `main` is a content release. `.github/workflows/release.yml` runs it, one release at a time (a `concurrency` group that never cancels a running release; of several queued releases only the newest runs, and it carries every earlier merge's content), strictly in this order, so a live deployment never points at media that isn't uploaded:
 
 1. **CI** (`ci.yml`, called as is): lint, typecheck, tests, validation and bundle, from the pointers.
 2. **Bundle** `dist/library.json` (`pnpm bundle`), while the checkout still has only pointers.
 3. **Plan** (`pnpm release plan`): lists the `exercise-media` bucket and plans every media object missing from it (`planUploads` in `src/library/upload-plan.ts`) to `dist/upload-plan.json`.
 4. **Pull** only the planned files' LFS objects (`git lfs pull --include`), never the whole LFS store, and `pnpm validate` them with their content (pixel limit, decoding).
 5. **Upload** them (`pnpm release upload`) through Supabase's S3 endpoint, after checking each file's sha256 against its oid.
-6. **Publish** `dist/library.json` to the private Blob store as `library.json`, overwriting the previous one (`pnpm release publish`).
+6. **Publish** `dist/library.json` to the private Blob store as `library.json`, overwriting the previous one (`pnpm release publish`). First it checks the release's commit is still `main`'s head: a re-run of an older release fails there instead of publishing stale content over a newer release's.
 7. **Redeploy:** `POST` the Vercel deploy hook. Vercel rebuilds the monorepo's `main`, whose `apps/exercises` build fetches the new `library.json` and bakes it in.
 
 - **Media objects** live at `<slug>/<oid>.<ext>` with their content type and `Cache-Control: public, max-age=31536000, immutable`. The path is part of the contract with `apps/exercises`, which builds the same paths into its media URLs (`mediaObjectPath` in `src/served-library.ts` in the monorepo): change both together. Objects already in the bucket are skipped; nothing is ever overwritten or deleted, so every earlier deployment's media stays available.
-- **Failures and re-runs:** any failing step stops the release, so a failed upload never publishes the bundle. Re-running it is safe: uploaded objects are skipped, and publishing the bundle and calling the hook are idempotent.
+- **Failures and re-runs:** any failing step stops the release, so a failed upload never publishes the bundle. Re-running the latest release is safe: uploaded objects are skipped, and publishing the bundle and calling the hook are idempotent.
 - **Secrets** (GitHub Actions): `SUPABASE_S3_ENDPOINT`, `SUPABASE_S3_REGION`, `SUPABASE_S3_ACCESS_KEY_ID`, `SUPABASE_S3_SECRET_ACCESS_KEY` (an S3 access key, never the service role), `BLOB_READ_WRITE_TOKEN` and `EXERCISES_DEPLOY_HOOK_URL`. Nothing from the monorepo is checked out or run here.
-- **Rollback:** Vercel's instant rollback on the `fitme-exercises` project restores the previous deployment, content included: each deployment carries its own copy of the Exercise Library, and its media is still in the bucket. That is temporary: the next release (or monorepo deploy) builds from the latest `library.json` again. Undoing content for good is a revert pull request here, which releases again.
+- **Rollback:** Vercel's instant rollback on the `fitme-exercises` Vercel project (the monorepo's `apps/exercises`) restores the previous deployment, content included: each deployment carries its own copy of the Exercise Library, and its media is still in the bucket. That is temporary: the next release (or monorepo deploy) builds from the latest `library.json` again. Undoing content for good is a revert pull request here, which releases again.
 
 ## Content layout
 

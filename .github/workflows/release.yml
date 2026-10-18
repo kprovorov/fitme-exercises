@@ -83,6 +83,17 @@ jobs:
           SUPABASE_S3_ACCESS_KEY_ID: ${{ secrets.SUPABASE_S3_ACCESS_KEY_ID }}
           SUPABASE_S3_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_S3_SECRET_ACCESS_KEY }}
 
+      # A re-run of an older release must not publish its bundle over a newer
+      # release's.
+      - name: Check the release is main's head
+        run: |
+          git fetch --quiet --depth=1 origin main
+          head=$(git rev-parse FETCH_HEAD)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "::error::$GITHUB_SHA is no longer main's head ($head): the newer release publishes instead"
+            exit 1
+          fi
+
       - name: Publish library.json
         run: pnpm release publish
         env:
