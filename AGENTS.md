@@ -14,11 +14,14 @@ src/library/media.ts      reads a media file: a Git LFS pointer (oid, size) or d
 src/library/mp4.ts        checks an MP4's box structure, brand and video track
 src/library/schema.ts     zod schemas for the metadata files
 src/library/muscle-groups.ts  the muscle group enum, mirroring @fitme/core
+src/library/upload-plan.ts   planUploads(media, keys): the media objects a release uploads (pure)
 src/validate.ts           pnpm validate: runs the loader and prints "valid" or every problem
 src/bundle.ts             pnpm bundle: writes library.json
+src/release.ts            pnpm release plan|upload|publish: the release's S3 and Blob steps
 fixtures/library/         a pointer-only copy of the fixture Exercises; fixtures/library.json is its expected bundle
 scripts/check-exercise-slugs.sh  PR CI: fails when an Exercise folder on the base branch is deleted or renamed
 .github/workflows/ci.yml  PR CI: lint, slugs, typecheck, tests, validation, bundle (no LFS download)
+.github/workflows/release.yml  the release, on every push to main (see Releases)
 ```
 
 ## Commands
@@ -33,11 +36,12 @@ pnpm validate [dir]      # validate the Exercise Library (default: exercises/)
 pnpm validate --require-lfs-pointers  # as CI: every media file must be an LFS pointer
 pnpm bundle [out]        # bundle exercises/ as library.json (default: dist/library.json)
 scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
+pnpm release plan|upload|publish  # the release's steps; only the release workflow runs them
 ```
 
 ## The library.json bundle
 
-`pnpm bundle` is how the Exercise Library leaves this repo: the release (every merge to `main`, once FIT-181's release workflow lands) publishes its output, and `apps/exercises`' build validates it against its own zod schema (`apps/exercises/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
+`pnpm bundle` is how the Exercise Library leaves this repo: the release (every merge to `main`, see Releases) publishes its output, and `apps/exercises`' build validates it against its own zod schema (`apps/exercises/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
 
 ```json
 {
@@ -56,7 +60,7 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 
 - No URLs, sizes or paths: both sides derive a media object's path as `<slug>/<oid>.<ext>`, and the API resolves URLs on its Supabase project.
 - Exercises are sorted by Exercise slug.
-- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. A release that needs LFS content to upload fetches it into `.git/lfs` (`git lfs fetch`) without checking it out, or bundles first. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
+- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. The release bundles first, before it pulls the LFS content it uploads. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
 - A format change touches both repos: the monorepo's schema first (it rejects anything it doesn't know), then `src/library/bundle.ts` here. `src/library/bundle.test.ts` bundles `fixtures/library/` and compares the result with `fixtures/library.json`, a copy of the monorepo's `apps/exercises/fixtures/library.json`: keep the two copies equal.
 
 ## Adding an Exercise
@@ -64,7 +68,24 @@ scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
 1. `git lfs install` (once per machine).
 2. Add `exercises/<slug>/` as in Content layout: both metadata files, the two markdown files, a thumbnail and a video.
 3. `pnpm validate`: with the media content present, this also checks the thumbnail's pixel limit and decodes both files.
-4. Commit and open a pull request. CI validates it from the pointers. Merging it to `main` is a content release (automated by FIT-181).
+4. Commit and open a pull request. CI validates it from the pointers. Merging it to `main` is a content release (see Releases).
+
+## Releases
+
+Merging a pull request to `main` is a content release. `.github/workflows/release.yml` runs it, one release at a time (a `concurrency` group that never cancels a running release), strictly in this order, so a live deployment never points at media that isn't uploaded:
+
+1. **CI** (`ci.yml`, called as is): lint, typecheck, tests, validation and bundle, from the pointers.
+2. **Bundle** `dist/library.json` (`pnpm bundle`), while the checkout still has only pointers.
+3. **Plan** (`pnpm release plan`): lists the `exercise-media` bucket and plans every media object missing from it (`planUploads` in `src/library/upload-plan.ts`) to `dist/upload-plan.json`.
+4. **Pull** only the planned files' LFS objects (`git lfs pull --include`), never the whole LFS store, and `pnpm validate` them with their content (pixel limit, decoding).
+5. **Upload** them (`pnpm release upload`) through Supabase's S3 endpoint, after checking each file's sha256 against its oid.
+6. **Publish** `dist/library.json` to the private Blob store as `library.json`, overwriting the previous one (`pnpm release publish`).
+7. **Redeploy:** `POST` the Vercel deploy hook. Vercel rebuilds the monorepo's `main`, whose `apps/exercises` build fetches the new `library.json` and bakes it in.
+
+- **Media objects** live at `<slug>/<oid>.<ext>` with their content type and `Cache-Control: public, max-age=31536000, immutable`. The path is part of the contract with `apps/exercises`, which builds the same paths into its media URLs (`mediaObjectPath` in `src/served-library.ts` in the monorepo): change both together. Objects already in the bucket are skipped; nothing is ever overwritten or deleted, so every earlier deployment's media stays available.
+- **Failures and re-runs:** any failing step stops the release, so a failed upload never publishes the bundle. Re-running it is safe: uploaded objects are skipped, and publishing the bundle and calling the hook are idempotent.
+- **Secrets** (GitHub Actions): `SUPABASE_S3_ENDPOINT`, `SUPABASE_S3_REGION`, `SUPABASE_S3_ACCESS_KEY_ID`, `SUPABASE_S3_SECRET_ACCESS_KEY` (an S3 access key, never the service role), `BLOB_READ_WRITE_TOKEN` and `EXERCISES_DEPLOY_HOOK_URL`. Nothing from the monorepo is checked out or run here.
+- **Rollback:** Vercel's instant rollback on the `fitme-exercises` project restores the previous deployment, content included: each deployment carries its own copy of the Exercise Library, and its media is still in the bucket. That is temporary: the next release (or monorepo deploy) builds from the latest `library.json` again. Undoing content for good is a revert pull request here, which releases again.
 
 ## Content layout
 
