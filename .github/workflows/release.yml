@@ -101,6 +101,12 @@ jobs:
 
       # Vercel rebuilds the monorepo's main, which bakes in the new bundle.
       - name: Redeploy apps/exercises
-        run: curl --fail-with-body --silent --show-error --request POST "$EXERCISES_DEPLOY_HOOK_URL"
+        # The hook only queues the build (a PENDING job); its outcome is in
+        # Vercel. Watching it would need a Vercel token, which this repo
+        # doesn't hold.
+        run: |
+          response=$(curl --fail-with-body --silent --show-error --request POST "$EXERCISES_DEPLOY_HOOK_URL")
+          echo "$response"
+          echo "$response" | jq --exit-status '.job.id' > /dev/null
         env:
           EXERCISES_DEPLOY_HOOK_URL: ${{ secrets.EXERCISES_DEPLOY_HOOK_URL }}

@@ -131,6 +131,11 @@ const uploadStep = async () => {
   console.log(`uploaded ${uploads.length} media objects`);
 };
 
+/**
+ * Overwrites the fixed pathname. The Blob CDN may serve the previous version
+ * for a while, but `apps/exercises`' build reads it with `useCache: false`
+ * (from origin storage), so the build the hook starts gets this one.
+ */
 const publishStep = async () => {
   const blob = await put(LIBRARY_BLOB, await readFile(BUNDLE_PATH), {
     access: "private",
