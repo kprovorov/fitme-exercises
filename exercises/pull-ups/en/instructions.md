@@ -1,0 +1,7 @@
+- Begin by standing under a sturdy pull-up bar with an overhand grip, hands slightly wider than shoulder-width apart.
+- Hang from the bar with arms fully extended, keeping feet off the ground by bending your knees if necessary.
+- Engage your core and pull your body upward, focusing on bringing your chin above the bar.
+- Keep your elbows close to your body and avoid swinging for momentum.
+- Once your chin is above the bar, pause for a moment.
+- Slowly lower your body back to the starting position with controlled movement.
+- Repeat for the desired number of repetitions, maintaining good form throughout.

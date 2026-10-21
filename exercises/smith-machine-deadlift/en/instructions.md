@@ -1,0 +1,8 @@
+- Begin by setting the appropriate weight on the Smith Machine.
+- Stand with your feet shoulder-width apart, positioning the bar over the middle of your feet.
+- Grasp the bar with an overhand grip, hands slightly wider than shoulder-width.
+- Engage your core and keep your chest up.
+- Bend your knees slightly and push your hips back as you lower your torso until your hands reach the bar.
+- Lift the bar by extending your hips and knees, keeping your back straight.
+- Lock out at the top by fully extending your hips.
+- Lower the bar in a controlled motion back to the starting position.

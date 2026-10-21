@@ -1,0 +1,8 @@
+- Stand between two cable machines, each with a high pulley system, ensuring handles are at shoulder height.
+- Grasp each handle, palms facing forward, and step forward with one foot, maintaining a slight bend in knees.
+- Extend arms sideways, slightly bending elbows, keeping hands aligned with shoulders.
+- Engage chest muscles and bring handles together in front of chest, maintaining slight elbow bend.
+- Squeeze chest muscles at the peak of contraction.
+- Slowly reverse movement, extending arms to the starting position.
+- Keep core engaged throughout to maintain stability.
+- Avoid overextending arms; maintain control of the cables during entire motion.

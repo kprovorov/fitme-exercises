@@ -1,0 +1,10 @@
+- Adjust the seat height of the Smith machine so the bar is at the upper part of your neck.
+- Load the barbell with the desired weight.
+- Sit on the bench with your back straight and feet flat on the floor.
+- Grip the barbell with a wide, overhand grip slightly wider than shoulder-width.
+- Carefully unrack the bar from the safety stops.
+- Slowly lower the barbell behind your head to ear level.
+- Push the bar back up to the starting position.
+- Keep a controlled motion throughout, avoiding locking your elbows.
+- Exhale while pressing up, inhale while lowering the bar.
+- Secure the barbell back on the safety stops after completion.

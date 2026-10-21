@@ -1,0 +1,11 @@
+- Stand facing the cable machine with feet shoulder-width apart.
+- Adjust the cable to the highest setting.
+- Attach a straight or angled bar to the cable.
+- Grasp the bar with an overhand grip, keeping hands shoulder-width apart.
+- Engage your core and slightly bend your knees.
+- Pull the bar down until your upper arms are close to your torso.
+- Keep elbows tucked in and fixed at your sides.
+- Extend your arms, pushing the bar down until your arms are fully straight.
+- Squeeze your triceps at the bottom of the movement.
+- Slowly return to the starting position without swinging your arms.
+- Maintain controlled motion throughout.

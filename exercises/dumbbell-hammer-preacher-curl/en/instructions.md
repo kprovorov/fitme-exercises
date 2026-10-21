@@ -1,0 +1,9 @@
+- Select an appropriate weight for the dumbbells and position an adjustable bench at a slight incline.
+- Sit on the bench and position yourself so that your upper arms rest against the preacher pad.
+- Hold a dumbbell in each hand with a neutral grip, palms facing each other.
+- Keep your back straight and feet flat on the floor.
+- Extend your arms fully, keeping a slight bend at the elbow to avoid locking.
+- Curl the dumbbells by contracting your biceps, bringing them towards your shoulders.
+- Squeeze at the top of the movement.
+- Slowly lower the dumbbells to the starting position.
+- Repeat for the desired number of repetitions.

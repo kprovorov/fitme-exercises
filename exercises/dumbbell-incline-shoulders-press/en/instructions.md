@@ -1,0 +1,9 @@
+- Begin by adjusting the bench to an incline angle of about 30-45 degrees.
+- Sit on the bench with your feet flat on the ground.
+- Hold a dumbbell in each hand at shoulder height with your palms facing forward.
+- Engage your core, keeping your back flat against the bench.
+- Press the dumbbells overhead by extending your arms, keeping a slight bend in the elbows.
+- Slowly lower the weights back to shoulder height, maintaining control.
+- Keep your head aligned with your spine and avoid arching your back.
+- Exhale as you press up and inhale as you lower the weights.
+- Repeat for the desired number of reps.

@@ -1,0 +1,8 @@
+- Attach D-handles to the high pulleys of a cable machine.
+- Stand in the center of the machine, feet shoulder-width apart.
+- Grasp the left handle with your right hand and the right handle with your left hand, crossing them in front of you.
+- Step back slightly to create tension in the cables.
+- Stand with a slight bend in your knees and a straight back.
+- Extend your arms outward directly in line with your shoulders, maintaining a slight bend in the elbows.
+- Squeeze your shoulder blades together at the peak.
+- Slowly return to the starting position and repeat.

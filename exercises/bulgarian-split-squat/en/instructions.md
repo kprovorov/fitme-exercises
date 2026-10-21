@@ -1,0 +1,9 @@
+- Begin by standing about two feet in front of a bench or sturdy elevated surface.
+- Position the top of your right foot onto the bench behind you.
+- Keep your left foot flat on the ground, slightly ahead of your hips.
+- Maintain a neutral spine and engage your core.
+- Slowly lower your right knee toward the ground, bending your left knee, while keeping weight distributed evenly on your front foot.
+- Continue descending until your front thigh is parallel to the ground.
+- Press through your left heel to return to standing.
+- Complete the desired repetitions before switching legs.
+- Keep movements controlled and steady throughout the exercise.

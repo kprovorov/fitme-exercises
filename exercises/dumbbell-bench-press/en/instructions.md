@@ -1,0 +1,9 @@
+- Begin seated on a flat bench, holding a dumbbell in each hand resting on your thighs.
+- Lay back on the bench, positioning the dumbbells at chest level with elbows bent.
+- Plant your feet firmly on the ground for stability.
+- Press the dumbbells up until your arms are fully extended, keeping wrists straight.
+- Slowly lower the dumbbells to the starting position, maintaining control.
+- Keep your elbows slightly tucked to protect your shoulder joints.
+- Exhale while pressing the dumbbells up and inhale while lowering them.
+- Perform the desired number of repetitions.
+- After finishing, carefully return to a seated position before placing the dumbbells down.

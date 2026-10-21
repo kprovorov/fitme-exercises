@@ -1,0 +1,10 @@
+- Stand with feet shoulder-width apart, core engaged.
+- Hold a dumbbell with both hands, palms facing upward, arms extended overhead.
+- Keep elbows close to ears, avoiding outward flaring.
+- Bend elbows to slowly lower the dumbbell behind your head.
+- Pause briefly when forearms are parallel to the floor.
+- Press through triceps to raise the dumbbell back to starting position.
+- Ensure your back remains straight, avoiding arching or leaning.
+- Maintain controlled, steady movements throughout the exercise.
+- Breathe in while lowering the weight, exhale as you lift.
+- Perform desired number of reps, focusing on form and muscle contraction.

@@ -1,0 +1,6 @@
+- Stand with feet hip-width apart, holding a dumbbell in each hand with arms fully extended and palms facing your thighs.
+- Engage your core and maintain a slight bend in the knees throughout the movement.
+- Hinge at the hips, pushing your glutes back, and lower the dumbbells along your legs, keeping them close to your body.
+- Keep your back straight and shoulders pulled back as you hinge forward.
+- Lower until you feel a stretch in your hamstrings, then engage your glutes and hamstrings to return to the starting position.
+- Repeat for desired repetitions, maintaining control and proper form throughout.

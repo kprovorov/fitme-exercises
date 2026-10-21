@@ -1,0 +1,7 @@
+- Select a pair of dumbbells with manageable weight and sit on the edge of a flat bench.
+- Hold the dumbbells with a neutral grip and lie back, ensuring your feet are flat on the ground.
+- Extend your arms above your chest, palms facing each other, with a slight bend in your elbows.
+- Inhale and slowly lower the dumbbells in a wide arc until you feel a stretch in your chest.
+- Exhale and bring the dumbbells back to the starting position in a controlled manner.
+- Keep your elbows slightly bent throughout and avoid arching your back.
+- Repeat for the desired number of repetitions.

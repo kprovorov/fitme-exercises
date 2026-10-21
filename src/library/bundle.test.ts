@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   exerciseFiles,
+  fakeOid,
+  lfsPointer,
   makeLibraryDir,
   prefix,
   TINY_PNG,
@@ -23,6 +25,18 @@ const bundleFiles = async (files: Record<string, string | Uint8Array>) => {
 };
 
 describe("bundleLibrary", () => {
+  it("keeps archival originals out of the published bundle", async () => {
+    const files = prefix("bench-press", exerciseFiles());
+    const withoutOriginal = await bundleFiles(files);
+    const withOriginal = await bundleFiles({
+      ...files,
+      "bench-press/original.mp4": lfsPointer(fakeOid("c"), 25_000_000),
+    });
+
+    expect(withoutOriginal.ok).toBe(true);
+    expect(withOriginal).toEqual(withoutOriginal);
+  });
+
   it("bundles the fixture Exercise Library as library.json version 1", async () => {
     // A copy of the monorepo's apps/exercises/fixtures/library.json: the
     // bundle the API's build accepts for these Exercises.

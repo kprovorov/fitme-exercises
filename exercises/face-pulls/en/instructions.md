@@ -1,0 +1,10 @@
+- Stand facing the cable machine or resistance band, feet shoulder-width apart.
+- Set the cable attachment at upper chest height.
+- Grasp the rope or handles with both hands, palms facing down.
+- Step back to create tension in the cable or band.
+- Pull towards your face, elbows flaring out to the sides.
+- Keep your shoulders down and back, avoiding shrugging.
+- Squeeze the shoulder blades together at the end of the movement.
+- Slowly extend your arms, returning to the starting position.
+- Maintain a straight posture, engaging your core throughout.
+- Repeat for the desired number of repetitions, keeping movements controlled.

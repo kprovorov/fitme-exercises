@@ -1,0 +1,9 @@
+- Stand facing the cable machine, feet shoulder-width apart.
+- Adjust the cable pulley to the highest position and attach a straight bar.
+- Grip the bar with both hands, using an overhand grip, arms shoulder-width apart.
+- Step back slightly, ensuring tension on the cable, with a slight forward lean.
+- Keep arms straight with a slight bend in the elbows.
+- Pull the bar down towards your thighs by engaging your lats and keeping your core tight.
+- Squeeze your shoulder blades together at the bottom.
+- Slowly return to the starting position, controlling the bar's ascent.
+- Repeat for the desired number of repetitions.

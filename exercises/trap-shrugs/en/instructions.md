@@ -1,0 +1,8 @@
+- Stand with feet shoulder-width apart, arms at sides, holding a dumbbell in each hand.
+- Keep chest up, shoulders relaxed, and gaze forward throughout the movement.
+- Inhale deeply, then exhale as you lift shoulders toward ears in a slow, controlled motion.
+- Squeeze traps at the top, holding the contraction briefly.
+- Slowly lower the shoulders back to the starting position while inhaling.
+- Ensure movements are controlled to maximize muscle engagement.
+- Avoid rolling shoulders or using momentum to lift weights.
+- Perform 3-4 sets of 10-15 repetitions, resting 30-60 seconds between sets.

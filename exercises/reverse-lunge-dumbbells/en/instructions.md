@@ -1,0 +1,8 @@
+- Stand upright holding a dumbbell in each hand with arms at your sides and feet hip-width apart.
+- Engage your core, maintaining a straight back and neutral spine.
+- Step backward with one leg, landing on the ball of your foot.
+- Lower your hips and bend both knees until the back knee nearly touches the ground.
+- Ensure the front knee remains stacked above the ankle.
+- Pause briefly at the bottom, then push through the front heel to return to the standing position.
+- Repeat the movement on the opposite leg.
+- Maintain a controlled pace throughout the exercise to ensure balance and stability.

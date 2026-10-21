@@ -1,0 +1,10 @@
+- Begin by standing with your feet shoulder-width apart.
+- Hold a dumbbell in each hand with an overhand grip.
+- Bend your knees slightly and hinge forward at the hips, keeping your back straight.
+- Position your torso almost parallel to the floor.
+- Keep your upper arms close to your body, elbows bent at a 90-degree angle.
+- Extend your arms straight back by pressing the weights behind you.
+- At the top of the movement, squeeze your triceps.
+- Slowly return to the starting position by bending your elbows.
+- Maintain a controlled motion throughout the exercise.
+- Perform the desired number of repetitions.

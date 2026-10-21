@@ -1,0 +1,9 @@
+- Stand facing the cable machine with feet shoulder-width apart.
+- Adjust the cable pulley to a high position and attach a single handle.
+- Grasp the handle with one hand, keeping the elbow close to your head.
+- Step back slightly and engage your core for stability.
+- With your upper arm stationary, extend your forearm downward using your triceps.
+- Fully extend the arm without locking the elbow, then slowly return to the starting position.
+- Maintain a controlled movement for both extension and flexion.
+- Complete your set, then switch arms.
+- Adjust the weight as needed to ensure proper form throughout.

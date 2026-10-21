@@ -1,0 +1,9 @@
+- Adjust the bench to a 30-45 degree incline and position it under the Smith machine bar.
+- Load the appropriate weight on the Smith machine barbell.
+- Sit on the bench, lying back with feet flat on the ground for stability.
+- Grasp the bar with an overhand grip, slightly wider than shoulder-width apart.
+- Unlock the bar from its resting position.
+- Lower the bar slowly to chest level, keeping elbows at a 45-degree angle.
+- Press the bar back up to the starting position in a controlled motion.
+- Repeat for the desired number of repetitions.
+- Re-rack the bar carefully upon completion.

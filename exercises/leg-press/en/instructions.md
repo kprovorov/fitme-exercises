@@ -1,0 +1,8 @@
+- Adjust the seat so your knees are at a 90-degree angle when your feet are on the platform.
+- Place your feet shoulder-width apart on the platform, toes slightly pointing outward.
+- Grip the side handles or seat supports for stability.
+- Keep your back flat against the seat throughout the exercise.
+- Press the platform with your feet, extending your legs fully without locking the knees.
+- Slowly lower the platform by bending the knees until they are at a 90-degree angle.
+- Exhale as you push the platform away; inhale as you lower it.
+- Perform the desired number of repetitions with controlled movements.

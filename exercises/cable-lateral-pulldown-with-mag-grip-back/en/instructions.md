@@ -1,0 +1,9 @@
+- Begin by attaching a Mag Grip handle to the cable machine's high pulley.
+- Stand facing the machine with feet shoulder-width apart.
+- Grasp the Mag Grip handle with both hands, using an overhand grip, arms fully extended.
+- Engage your core and slightly lean back while keeping a stable stance.
+- Pull the grip down towards your upper chest, squeezing your shoulder blades together.
+- Avoid using momentum; focus on controlled movement through your back muscles.
+- Pause briefly at the bottom of the movement.
+- Slowly extend your arms back to the starting position, maintaining tension.
+- Perform the desired number of repetitions while maintaining proper form.

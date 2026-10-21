@@ -1,0 +1,7 @@
+- Adjust the seat height so the backrest supports your spine comfortably and you're seated upright.
+- Set the Smith machine bar to the appropriate height, just above shoulder level.
+- Sit down with your feet flat on the floor and grasp the bar with an overhand grip, hands slightly wider than shoulder-width apart.
+- Unlock the bar by rotating your wrists slightly.
+- Inhale and lower the bar slowly until it’s just above your chest.
+- Exhale and press the bar upward until your arms are nearly straight, without locking the elbows.
+- Repeat for desired reps, re-rack the bar carefully by rotating your wrists backward.

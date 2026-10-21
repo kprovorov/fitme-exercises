@@ -1,0 +1,9 @@
+- Position the bench under the Smith machine bar so that it aligns with your chest.
+- Sit on the bench and lie back, ensuring your head is supported.
+- Grip the bar with hands slightly wider than shoulder-width apart, palms facing forward.
+- Unrack the bar by rotating it forward and extending your arms fully.
+- Lower the bar slowly to your mid-chest, inhaling during descent.
+- Pause briefly as the bar touches your chest gently.
+- Press the bar upward, fully extending your arms and exhaling.
+- Lock out your elbows briefly at the top and then repeat.
+- Perform the desired number of repetitions, then rack the bar securely.

@@ -1,0 +1,8 @@
+- Begin by standing with your feet shoulder-width apart, holding a dumbbell in each hand.
+- Lift the dumbbells to shoulder height with palms facing forward and elbows bent.
+- Engage your core to stabilize your body throughout the movement.
+- Press the dumbbells overhead until your arms are fully extended but not locked out.
+- Lower the dumbbells back to shoulder height in a controlled manner.
+- Keep your back straight and avoid leaning or arching.
+- Use a manageable weight to maintain proper form.
+- Repeat for the desired number of repetitions, maintaining control and breathing steadily.

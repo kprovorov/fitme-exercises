@@ -1,0 +1,10 @@
+- Attach a rope to the high pulley of a cable machine.
+- Stand facing the machine with feet shoulder-width apart.
+- Grip the rope with palms facing each other, elbows at your sides.
+- Maintain an upright posture with back straight and core engaged.
+- Pull the rope down by extending your elbows.
+- Keep elbows stationary and close to your body throughout.
+- At the bottom, split the rope apart with palms facing down.
+- Squeeze triceps at the contraction point.
+- Slowly return to the starting position with control.
+- Repeat for desired repetitions, maintaining consistent form and tempo.

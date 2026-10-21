@@ -1,0 +1,10 @@
+- Stand with feet shoulder-width apart, slightly bending knees.
+- Position the barbell between legs, attach a landmine or T-bar handle.
+- Bend at hips with a straight back to grip handle, ensuring palms face down.
+- Keep chest lifted, shoulders back, and core engaged.
+- Pull handle towards upper abdomen by retracting shoulder blades.
+- Hold and squeeze shoulder blades together at top.
+- Slowly lower handle back to starting position.
+- Maintain neutral spine throughout, avoiding movement in lower back.
+- Perform the desired number of repetitions, maintaining control.
+- Use appropriate weight for safe and effective execution.

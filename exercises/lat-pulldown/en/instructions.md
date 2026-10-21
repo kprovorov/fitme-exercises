@@ -1,0 +1,8 @@
+- Adjust the thigh pad to fit snugly against your thighs for stability.
+- Choose an appropriate weight on the weight stack.
+- Sit down on the seat with feet flat on the floor, keeping your back straight.
+- Grasp the bar with a wide overhand grip, slightly wider than shoulder-width apart.
+- Pull your shoulders back and down, squeezing your shoulder blades together.
+- Inhale, then pull the bar down towards your upper chest in a controlled motion while keeping your elbows directly under your wrists.
+- Pause briefly at the bottom of the movement.
+- Exhale and slowly release the bar back to the starting position, fully extending your arms.

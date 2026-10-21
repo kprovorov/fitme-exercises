@@ -1,0 +1,8 @@
+- Stand with feet shoulder-width apart, holding one end of a barbell in both hands.
+- Anchor the opposite end of the barbell securely on the floor or in a landmine attachment.
+- Start by holding the barbell end at shoulder height, elbows bent slightly.
+- Engage core muscles and press the barbell upward and forward in an arc motion until arms are fully extended.
+- Keep back straight and avoid arching, to maintain proper form.
+- Slowly lower the barbell back to shoulder height, controlling the movement.
+- Repeat desired repetitions, ensuring steady breathing.
+- Always focus on slow and controlled movements to maximize muscle engagement and prevent injury.

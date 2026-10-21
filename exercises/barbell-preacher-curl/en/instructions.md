@@ -1,0 +1,8 @@
+- Begin by adjusting the preacher bench so that it is comfortable for your height.
+- Load the barbell with your desired weight, ensuring equal weight on both sides.
+- Sit on the preacher bench and rest the backs of your upper arms on the pad.
+- Grasp the barbell with an underhand grip, slightly wider than shoulder-width apart.
+- Start with your arms extended, holding the barbell just above the resting point.
+- Curl the barbell upwards towards your shoulders, squeezing your biceps at the peak.
+- Slowly lower the barbell back to the starting position.
+- Repeat for the desired number of repetitions, maintaining good form throughout.

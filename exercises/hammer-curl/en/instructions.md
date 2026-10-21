@@ -1,0 +1,8 @@
+- Stand upright with feet shoulder-width apart and arms fully extended, holding a dumbbell in each hand.
+- Ensure palms face your body, maintaining a neutral grip on the dumbbells.
+- Keep your shoulders down and back while engaging your core throughout the movement.
+- Slowly bend your elbows, lifting the dumbbells towards your shoulders in a controlled motion.
+- Avoid swinging the weights or using momentum; focus on the biceps' contraction.
+- Pause briefly at the top of the movement, feeling the peak contraction.
+- Gradually lower the dumbbells back to the starting position.
+- Repeat for the desired number of repetitions, maintaining form and control.

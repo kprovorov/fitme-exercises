@@ -1,0 +1,8 @@
+- Lie on a bench with your feet flat on the ground and your back firmly pressed against the bench.
+- Hold a dumbbell in each hand with an overhand grip, arms fully extended above your shoulders.
+- Keep your elbows tucked in close to your body and stationary.
+- Slowly lower the dumbbells towards your ears by bending your elbows.
+- Pause briefly when the dumbbells reach just above your forehead.
+- Extend your arms back to the starting position without locking your elbows.
+- Maintain a steady motion throughout the exercise and engage your core for stability.
+- Repeat for the desired number of repetitions while ensuring proper form.

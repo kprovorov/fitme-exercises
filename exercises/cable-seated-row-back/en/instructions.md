@@ -1,0 +1,10 @@
+- Sit on the bench and place your feet on the platform, knees slightly bent.
+- Grasp the cable handle using an overhand grip, arms fully extended.
+- Keep your back straight and chest up, engaging your core.
+- Pull the handle towards your torso, squeezing your shoulder blades together.
+- Keep elbows close to your body and avoid using momentum.
+- Pause briefly when the handle reaches your abdomen.
+- Gradually extend your arms, returning the handle to the starting position.
+- Maintain control throughout the movement, avoiding leaning back excessively.
+- Exhale while pulling and inhale during the release.
+- Perform the desired number of repetitions, focusing on form.

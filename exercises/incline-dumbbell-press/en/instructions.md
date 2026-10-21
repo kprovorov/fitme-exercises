@@ -1,0 +1,10 @@
+- Set an adjustable bench to a 30-45 degree incline.
+- Hold a dumbbell in each hand, resting them on your thighs.
+- Sit back and position dumbbells near your shoulders, elbows bent.
+- Engage your core and press the dumbbells up until arms are fully extended over your chest.
+- Keep wrists neutral and do not lock elbows.
+- Lower dumbbells slowly back to starting position at shoulder level.
+- Keep movements controlled throughout the exercise.
+- Inhale as you lower weights, exhale as you press up.
+- Complete desired number of repetitions.
+- Use a spotter if lifting heavy weights.

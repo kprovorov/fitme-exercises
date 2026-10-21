@@ -22,7 +22,8 @@ interface MediaKind {
   format: MediaFormat;
   maxPixels?: number;
   maxSize: number;
-  name: "thumbnail" | "video";
+  name: "thumbnail" | "video" | "original";
+  required?: boolean;
 }
 
 const THUMBNAIL: MediaKind = {
@@ -40,6 +41,14 @@ const VIDEO: MediaKind = {
   name: "video",
 };
 
+/** Optional archival source: validated and tracked in LFS, never published. */
+const ORIGINAL_VIDEO: MediaKind = {
+  ...VIDEO,
+  maxSize: 100 * MB,
+  name: "original",
+  required: false,
+};
+
 export interface LoadOptions {
   /**
    * Require every media file to be a Git LFS pointer. Set it where LFS content
@@ -55,7 +64,7 @@ const LOCALE_ENTRIES = new Set([
   "description.md",
   "instructions.md",
 ]);
-const MEDIA_NAMES = new Set(["thumbnail", "video"]);
+const MEDIA_NAMES = new Set(["thumbnail", "video", "original"]);
 
 const stripExtension = (name: string) =>
   name.slice(0, name.length - extname(name).length);
@@ -81,8 +90,7 @@ export const loadLibrary = async (
     .filter((entry) => !entry.name.startsWith("."))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // One Exercise at a time: with LFS content downloaded, each holds up to
-  // 45 MB of media in memory.
+  // One Exercise at a time; media files are read sequentially to bound memory.
   const loaded: { exercise?: Exercise; problems: Problem[] }[] = [];
   for (const entry of entries) {
     loaded.push(
@@ -149,12 +157,13 @@ const loadExercise = async (
           MEDIA_NAMES.has(stripExtension(name).toLowerCase())
         )
     ),
-    "an Exercise folder holds only metadata.json, en/, a thumbnail and a video"
+    "an Exercise folder holds only metadata.json, en/, a thumbnail, a video and an optional original.mp4"
   );
   const metadata = await readJson(folder, "metadata.json", ExerciseMetadata);
   const en = await readLocale(folder, "en");
   const thumbnail = await readMediaKind(folder, files, THUMBNAIL);
   const video = await readMediaKind(folder, files, VIDEO);
+  await readMediaKind(folder, files, ORIGINAL_VIDEO);
 
   if (problems.length > 0 || !(metadata && en && thumbnail && video)) {
     return { problems };
@@ -296,10 +305,12 @@ const findMediaFile = (
   );
 
   if (candidates.length === 0) {
-    folder.report(
-      `${kind.name}.${allowed.length > 1 ? `{${allowed.join(",")}}` : allowed[0]}`,
-      `missing ${kind.name}`
-    );
+    if (kind.required !== false) {
+      folder.report(
+        `${kind.name}.${allowed.length > 1 ? `{${allowed.join(",")}}` : allowed[0]}`,
+        `missing ${kind.name}`
+      );
+    }
     return;
   }
   if (candidates.length > 1) {

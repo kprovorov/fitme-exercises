@@ -1,0 +1,8 @@
+- Sit on the ground with your upper back against a bench, feet flat on the floor, and roll a loaded barbell over your hips.
+- Position the lower middle of your shoulder blades against the bench.
+- Brace your core, engage your glutes, and push through your heels.
+- Lift the barbell by extending your hips vertically until your thighs and torso form a straight line.
+- Squeeze your glutes at the top of the movement.
+- Lower the barbell with control, returning to the starting position.
+- Keep your head and neck aligned with your spine throughout the exercise.
+- Repeat for the desired number of repetitions.

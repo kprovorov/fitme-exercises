@@ -1,0 +1,9 @@
+- Begin by adjusting the safety stops on the Smith machine to a comfortable height to ensure safety.
+- Position yourself under the barbell, aligning it just below the neck resting on the upper traps.
+- Stand with feet shoulder-width apart, slightly turned outward.
+- Unlock the bar from the rack by twisting your wrists.
+- Engage your core, maintaining a neutral spine and an upright chest.
+- Inhale, lowering your body by bending the knees while pushing hips back.
+- Descend until thighs are parallel to the floor.
+- Exhale, driving through your heels to return to the starting position, extending knees and hips.
+- Repeat for the desired number of reps.

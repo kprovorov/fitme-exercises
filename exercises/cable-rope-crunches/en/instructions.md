@@ -1,0 +1,8 @@
+- Attach a rope handle to the high pulley of a cable station.
+- Kneel in front of the cable machine, facing it, with your hands holding the rope in an overhand grip.
+- Position the rope behind your head, with your hands on either side of it.
+- Keep your elbows close to your ears, engaging your core.
+- Bend at the waist, pulling your elbows towards your thighs, while contracting your abs.
+- Pause briefly at the bottom of the movement for maximum contraction.
+- Return slowly to the starting position while maintaining tension in your abs.
+- Repeat for desired repetitions, keeping your movements controlled and steady.

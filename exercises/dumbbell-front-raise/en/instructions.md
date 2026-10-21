@@ -1,0 +1,8 @@
+- Stand upright with feet shoulder-width apart, holding a dumbbell in each hand, arms fully extended and resting against your thighs.
+- Keep a slight bend in your elbows and a neutral grip, palms facing your thighs.
+- Engage your core and maintain a straight back.
+- Lift the dumbbells in front of you, raising them to shoulder height, keeping your arms extended.
+- Pause briefly at the top of the movement, keeping tension in your shoulders.
+- Slowly lower the dumbbells back to the starting position in a controlled manner.
+- Avoid using momentum and ensure the movement is steady.
+- Repeat for the desired number of repetitions.

@@ -1,0 +1,10 @@
+- Position the height of the Smith machine bar to just below shoulder height.
+- Load the desired weight plates onto the bar.
+- Stand with feet shoulder-width apart, grip the bar slightly wider than shoulder-width, palms facing forward.
+- Unlock the bar by rotating your wrists.
+- Engage your core, maintain a slight bend in your knees, and keep your chest upright.
+- Press the bar upward until arms are fully extended overhead.
+- Pause briefly, keeping control of the bar.
+- Lower the bar slowly back to the starting position near your shoulders.
+- Repeat for the desired number of repetitions.
+- Ensure proper form throughout to prevent injury.

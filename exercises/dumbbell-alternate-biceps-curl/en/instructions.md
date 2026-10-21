@@ -1,0 +1,8 @@
+- Stand with feet shoulder-width apart, holding a dumbbell in each hand with an underhand grip.
+- Keep arms hanging by your sides, elbows close to the torso, palms facing forward.
+- Engage core muscles, keeping back straight and shoulders relaxed.
+- Curl the left dumbbell upward by bending the elbow, keeping the upper arm stationary.
+- Pause at shoulder height, squeezing the bicep.
+- Slowly lower the left dumbbell back to the starting position.
+- Repeat the curl with the right dumbbell while keeping the left arm stationary.
+- Continue to alternate arms for the desired number of repetitions.

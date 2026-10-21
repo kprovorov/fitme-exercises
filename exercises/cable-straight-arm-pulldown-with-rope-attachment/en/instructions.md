@@ -1,0 +1,9 @@
+- Start by attaching a rope to the high pulley of a cable machine.
+- Stand about two feet away from the machine, feet shoulder-width apart.
+- Grasp the rope with both hands, thumbs facing towards each other.
+- Slightly hinge at the hips, keeping your back straight and core engaged.
+- Pull the rope downward by extending your arms straight, keeping elbows slightly bent.
+- Focus on using your lats to pull rather than your arms or shoulders.
+- Squeeze your lats at the bottom of the movement.
+- Slowly return to the starting position, maintaining tension in the rope.
+- Repeat for the desired number of repetitions.

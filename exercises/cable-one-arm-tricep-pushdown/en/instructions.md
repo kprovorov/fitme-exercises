@@ -1,0 +1,10 @@
+- Attach a single handle to the high pulley of the cable machine.
+- Stand facing the machine, feet shoulder-width apart.
+- Grasp the handle with one hand using an overhand grip, elbow bent at a 90-degree angle.
+- Keep your upper arm stationary and close to your side.
+- Engage your core and maintain a straight posture.
+- Push the handle down by extending your elbow until your arm is fully straightened.
+- Pause briefly at the bottom of the movement, squeezing your tricep.
+- Slowly return to the starting position with controlled motion.
+- Complete desired repetitions, then switch arms.
+- Adjust resistance as needed to maintain proper form.

@@ -1,0 +1,9 @@
+- Position an adjustable bench at a 45-degree incline.
+- Select a pair of dumbbells with a manageable weight.
+- Sit on the bench with your back firmly against the pad, feet flat on the floor.
+- Hold a dumbbell in each hand, arms hanging down, palms facing inward.
+- Curl the weights while rotating your wrists so palms face upward.
+- Keep elbows stationary and close to your body as you lift.
+- Squeeze biceps at the top of the curl briefly.
+- Lower the dumbbells slowly to the starting position.
+- Repeat for the desired number of repetitions, maintaining steady breathing throughout.

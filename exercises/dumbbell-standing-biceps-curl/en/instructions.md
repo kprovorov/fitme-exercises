@@ -1,0 +1,8 @@
+- Stand upright with feet shoulder-width apart, grasping a dumbbell in each hand with an underhand grip.
+- Let arms hang at your sides, keeping elbows close to your torso.
+- Keep upper arms stationary; curl the weights by bending elbows, lifting until biceps are fully contracted and dumbbells are at shoulder level.
+- Pause briefly at the top of the movement, squeezing biceps.
+- Slowly lower weights back to starting position, maintaining control.
+- Ensure back is straight and core engaged throughout.
+- Avoid swinging or using momentum to lift weights.
+- Repeat for desired number of repetitions.
