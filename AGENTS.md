@@ -103,7 +103,7 @@ exercises/
     original.mp4               optional high resolution source; at most 100 MB (Git LFS), not published
 ```
 
-- **Exercise slug rules:** the folder name is the Exercise slug. It matches `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase letters and digits, words joined by single hyphens, no leading, trailing or doubled hyphens. It is permanent: never rename or delete an Exercise folder (Plans and Workout Sessions refer to it). PR CI fails when an Exercise folder present on the base branch is deleted or renamed, listing the missing Exercise slugs; there is no override for real Exercises. The only exceptions are the three retired seed placeholders: `example-press`, `example-row` and `example-squat`. Change the display name in `en/metadata.json` instead.
+- **Exercise slug rules:** the folder name is the Exercise slug. It matches `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase letters and digits, words joined by single hyphens, no leading, trailing or doubled hyphens. It is permanent: never rename or delete an Exercise folder (Plans and Workout Sessions refer to it). PR CI fails when an Exercise folder present on the base branch is deleted or renamed, listing the missing Exercise slugs; there is no override. Change the display name in `en/metadata.json` instead.
 - Muscle groups must come from `src/library/muscle-groups.ts`, at least one, no repeats. That enum mirrors `muscleGroups` in the monorepo's `@fitme/core`: a new muscle group goes into `@fitme/core` first (the API rejects a bundle with a muscle group it doesn't know), then into the enum here.
 - Metadata and markdown files must be valid UTF-8. Metadata files are strict: unknown keys are problems. New fields are added to the schema first.
 - Media extensions are lowercase: `thumbnail.jpg` (not `.jpeg` or `.JPG`), `thumbnail.png`, `thumbnail.webp`, `video.mp4`. Exactly one thumbnail and one video per Exercise.
@@ -121,7 +121,7 @@ Media (`exercises/**/*.{jpg,png,webp,mp4}`) is tracked with Git LFS (`.gitattrib
 - **The 50 megapixel limit** needs the image's pixel dimensions, which a pointer doesn't carry. It is checked only when the image's content is present locally: on a content author's machine (where the thumbnail is added) and wherever LFS objects are fetched (the release workflow fetches the objects it uploads). PR CI, which never downloads LFS content, checks it only through the size limit. The same goes for the content checks: a thumbnail must decode (sharp) and match its extension, and a video must be a structurally valid MP4 (an MP4 brand in `ftyp`) with a video track that has a sample description and at least one sample (samples are not decoded; fragmented MP4 is not supported).
 - **CI requires pointers.** PR CI runs `pnpm validate --require-lfs-pointers` and `pnpm bundle`: a media file that checks out as content rather than a pointer there was committed without Git LFS, and is a problem. Locally the same problem means LFS content is checked out.
 - Exercise folders and their media files are loaded sequentially, so downloaded media never piles up in memory. An optional original can be up to 100 MB.
-- The three made-up seed Exercises (`example-press`, `example-row`, `example-squat`) have been removed from `exercises/`. Their pointer-only test copies remain in `fixtures/library/` with the matching `fixtures/library.json` bundle.
+- Pointer-only test Exercises live in `fixtures/library/` with the matching `fixtures/library.json` bundle.
 
 ## Glossary
 
