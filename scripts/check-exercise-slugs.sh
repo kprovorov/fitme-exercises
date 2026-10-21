@@ -2,7 +2,6 @@
 # Fails when an Exercise folder on the base branch is gone from HEAD (deleted
 # or renamed), naming its Exercise slug. Exercise slugs are permanent: Plans
 # and Workout Sessions refer to them, so an Exercise is never removed.
-# The three retired seed examples are the only exception.
 #
 # Usage: scripts/check-exercise-slugs.sh [base-ref]  (default: origin/main)
 set -euo pipefail
@@ -15,8 +14,7 @@ exercise_slugs() {
     { grep -v '^\.' || true; } | sort
 }
 
-missing=$(comm -23 <(exercise_slugs "$base") <(exercise_slugs HEAD) |
-  { grep -Ev '^(example-press|example-row|example-squat)$' || true; })
+missing=$(comm -23 <(exercise_slugs "$base") <(exercise_slugs HEAD))
 
 if [[ -n $missing ]]; then
   echo "Exercise slugs are permanent, but these Exercise folders on the base branch are missing (deleted or renamed):"
