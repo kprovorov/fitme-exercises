@@ -1,0 +1,8 @@
+- Start by positioning a decline bench under a Smith machine and adjust the bench to a decline angle.
+- Ensure the bar is secured properly and add desired weight plates evenly on both sides.
+- Lie down on the bench with your feet securely anchored and your back resting against the bench pad.
+- Grip the bar slightly wider than shoulder-width apart, palms facing forward.
+- Unlock the bar from the safety locks and hold it above your chest with arms fully extended.
+- Lower the bar slowly to your lower chest by bending your elbows.
+- Press the bar back up to the starting position, fully extending your arms.
+- Repeat for the desired number of repetitions.

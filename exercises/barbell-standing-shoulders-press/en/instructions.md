@@ -1,0 +1,11 @@
+- Stand with feet shoulder-width apart, knees slightly bent.
+- Grip the barbell with hands slightly wider than shoulder-width.
+- Lift the barbell to shoulder height, elbows pointing down.
+- Engage core muscles to stabilize your body.
+- Press the barbell overhead by extending the elbows.
+- Do not lock elbows at the top position.
+- Lower the barbell back to shoulder height under control.
+- Keep your back straight and avoid leaning backward.
+- Breathe in while lowering and exhale on the press up.
+- Repeat for the desired number of repetitions.
+- Ensure the movement is controlled and steady throughout.

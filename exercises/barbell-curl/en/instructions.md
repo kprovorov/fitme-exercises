@@ -1,0 +1,9 @@
+- Begin by standing with your feet shoulder-width apart.
+- Grip the barbell with an underhand grip, hands slightly wider than shoulder-width.
+- Keep your elbows close to your torso and your back straight.
+- Start with your arms fully extended and the bar resting on your thighs.
+- Curl the barbell upwards by flexing your elbows, keeping them stationary.
+- Focus on contracting your biceps as you lift the weight.
+- Pause at the top of the movement.
+- Slowly lower the barbell back to the starting position, fully extending your arms.
+- Repeat for the desired number of repetitions, maintaining control throughout.

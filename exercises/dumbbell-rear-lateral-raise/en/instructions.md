@@ -1,0 +1,10 @@
+- Stand with feet shoulder-width apart, holding a dumbbell in each hand.
+- Bend slightly at the hips and knees, keeping your back straight.
+- Let the dumbbells hang directly below your shoulders, palms facing each other.
+- Engage your core for stability.
+- Raise the dumbbells outward to your sides, elbows slightly bent, until arms are parallel to the floor.
+- Keep shoulders down and squeeze shoulder blades together at the top.
+- Slowly lower the weights back to the starting position.
+- Maintain controlled movement throughout.
+- Complete desired reps, avoiding momentum or jerking motions.
+- Inhale as you lower, exhale as you lift.

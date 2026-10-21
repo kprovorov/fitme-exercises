@@ -1,0 +1,7 @@
+- Stand with feet hip-width apart on the edge of a step or raised platform, heels hanging off.
+- Engage your core for stability.
+- Place hands on your hips or lightly grip a supportive surface for balance.
+- Slowly lift your heels as high as possible, standing on the balls of your feet.
+- Pause at the top to fully contract your calf muscles.
+- Gradually lower your heels back to the starting position, feeling a gentle stretch in the calves.
+- Repeat the movement for the desired number of repetitions, maintaining steady and controlled motions throughout.

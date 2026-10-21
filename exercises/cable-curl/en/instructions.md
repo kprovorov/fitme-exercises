@@ -1,0 +1,8 @@
+- Stand up straight facing the cable machine, keeping your feet shoulder-width apart.
+- Attach an EZ bar to the low pulley of the cable machine.
+- Grasp the bar with an underhand grip, hands shoulder-width apart.
+- Keep your elbows close to your torso and maintain a slight bend in your knees.
+- Slowly curl the bar upwards while keeping your upper arms stationary, focusing on contracting your biceps.
+- Pause briefly at the top of the movement, ensuring maximum contraction.
+- Gradually lower the bar back to the starting position in a controlled manner.
+- Repeat for the desired number of repetitions, maintaining proper form throughout.

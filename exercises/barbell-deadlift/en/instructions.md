@@ -1,0 +1,8 @@
+- Stand with feet hip-width apart, mid-foot under the barbell.
+- Bend at the hips and knees, gripping the bar just outside your knees.
+- Keep your back straight, chest up, and core engaged.
+- Lift the bar by extending hips and knees, keeping the bar close to your body.
+- Stand tall at the top, shoulders back, but avoid overextending.
+- Lower the bar by bending hips and knees, maintaining a straight back.
+- Ensure the bar returns to the floor under control.
+- Repeat for desired repetitions while maintaining form.

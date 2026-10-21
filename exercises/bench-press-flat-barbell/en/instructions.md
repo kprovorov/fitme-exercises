@@ -1,0 +1,8 @@
+- Position yourself flat on a bench with feet grounded firmly on the floor.
+- Align eyes directly under the barbell, maintaining a neutral spine.
+- Grip the bar slightly wider than shoulder-width with palms facing forward.
+- Unrack the bar by pushing it upward and positioning it over your shoulder joints.
+- Lower the bar slowly to your mid-chest, elbows at approximately a 45-degree angle.
+- Push the bar back up to the starting position by extending your arms fully.
+- Ensure wrists remain straight throughout the movement.
+- Perform the desired number of repetitions, maintaining consistent form.

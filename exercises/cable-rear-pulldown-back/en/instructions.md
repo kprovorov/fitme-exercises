@@ -1,0 +1,8 @@
+- Begin by attaching a straight or EZ-curl bar to a high pulley machine.
+- Sit down on the machine’s bench and plant your feet firmly on the ground.
+- Adjust the knee pad to secure your legs and prevent your body from lifting during the exercise.
+- Grasp the bar with a wide, overhand grip, palms facing forward.
+- Lean slightly back, engaging your core, and extend your arms fully.
+- Pull the bar down towards the upper part of your chest, squeezing your shoulder blades together.
+- Pause briefly before slowly returning the bar to the starting position.
+- Ensure controlled movement, avoiding swinging or using momentum.

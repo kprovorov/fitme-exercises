@@ -1,0 +1,8 @@
+- Begin by adjusting the preacher curl bench so that your armpits rest comfortably at the top of the bench.
+- Sit down and grip the barbell with an underhand grip, keeping hands shoulder-width apart.
+- Position your upper arms flush with the bench pad while keeping your back straight.
+- Slowly curl the bar upwards by contracting your biceps, keeping elbows stationary.
+- At the top of the movement, pause briefly to maximize tension.
+- Gradually lower the bar back to the starting position, extending your elbows fully.
+- Maintain controlled movement throughout the exercise.
+- Repeat for the desired number of repetitions, focusing on form and tension.

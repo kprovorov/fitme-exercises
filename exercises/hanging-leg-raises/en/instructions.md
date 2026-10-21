@@ -1,0 +1,10 @@
+- Find a pull-up bar or sturdy overhead surface that's secure enough to support your weight.
+- Grasp the bar with an overhand grip, hands shoulder-width apart.
+- Hang straight with your arms fully extended and your legs together.
+- Engage your core muscles and keep your torso stable.
+- Slowly raise your legs by flexing at the hips while keeping them straight.
+- Lift your legs until they are parallel to the ground or higher if possible.
+- Pause briefly at the top of the movement while maintaining control.
+- Lower your legs slowly back to the starting position.
+- Avoid swinging or using momentum to complete the movement.
+- Repeat for the desired number of repetitions.

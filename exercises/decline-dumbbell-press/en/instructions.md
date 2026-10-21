@@ -1,0 +1,6 @@
+- Begin by adjusting a decline bench to the desired angle, typically between 15 to 30 degrees.
+- Hold a pair of dumbbells with an overhand grip and sit on the bench, securing your feet under the supports.
+- Lie back with the dumbbells held at shoulder height, elbows bent at about 90 degrees.
+- Engage your core and press the dumbbells upward until your arms are fully extended above your chest.
+- Lower the dumbbells slowly back to the starting position, keeping your elbows slightly pointed out.
+- Repeat for the desired number of repetitions, maintaining control throughout the movement.

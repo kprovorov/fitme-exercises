@@ -1,0 +1,10 @@
+- Adjust the bench to a 15-30 degree incline.
+- Load the barbell with appropriate weight.
+- Lie back on the bench, placing your feet flat on the floor.
+- Grip the barbell with hands slightly wider than shoulder-width apart.
+- Lift the barbell off the rack, keeping arms fully extended above your chest.
+- Lower the barbell slowly to the upper chest, elbows at a 45-degree angle.
+- Push the barbell back to the starting position by extending your arms fully.
+- Maintain a controlled motion throughout the exercise.
+- Inhale while lowering the barbell and exhale while pressing upwards.
+- Repeat for the desired number of repetitions.

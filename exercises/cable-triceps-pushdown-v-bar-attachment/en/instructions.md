@@ -1,0 +1,7 @@
+- Stand facing a high pulley machine, feet shoulder-width apart.
+- Grasp the V-bar attachment with an overhand grip, arms extended and elbows close to your sides.
+- Keep your back straight and core engaged throughout the exercise.
+- Exhale and push the V-bar down by extending your elbows until your arms are fully straightened.
+- Avoid moving your upper arms; maintain elbow positioning throughout the movement.
+- Inhale and slowly allow the V-bar to return to the starting position with control.
+- Repeat for the desired number of repetitions, maintaining proper form and posture.

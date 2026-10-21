@@ -1,0 +1,9 @@
+- Stand with feet shoulder-width apart, holding the barbell with an overhand grip, palms facing down.
+- Hinge at the hips, bending forward until the torso is nearly parallel to the ground.
+- Keep knees slightly bent and core engaged to maintain a neutral spine.
+- Let the barbell hang directly below your shoulders, arms fully extended.
+- Pull the barbell towards your lower ribcage, keeping elbows close to your body.
+- Squeeze shoulder blades together at the top of the movement.
+- Slowly lower the barbell back to the starting position, arms fully extended.
+- Keep your head in a neutral position throughout the exercise.
+- Repeat for desired repetitions.

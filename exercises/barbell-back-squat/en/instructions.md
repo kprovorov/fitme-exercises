@@ -1,0 +1,10 @@
+- Stand with feet shoulder-width apart, engage core.
+- Position barbell on upper traps, grip it with hands slightly wider than shoulder-width.
+- Inhale deeply at the top, brace core, and maintain a neutral spine.
+- Initiate movement by hinging hips back, then bend knees.
+- Squat down until thighs are parallel to the floor or slightly below.
+- Keep chest up, knees tracking over toes.
+- Exhale while driving through heels to return to standing position.
+- Maintain upright torso and head alignment with spine.
+- Perform motion smoothly, avoiding jerky movements.
+- Complete desired number of repetitions maintaining form throughout.

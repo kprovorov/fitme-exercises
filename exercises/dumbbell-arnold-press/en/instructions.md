@@ -1,0 +1,8 @@
+- Stand or sit on a bench with back support, holding a dumbbell in each hand.
+- Position the dumbbells at shoulder height with palms facing you.
+- Keep elbows close to the body and feet shoulder-width apart.
+- Press the dumbbells overhead while rotating palms outward until facing forward.
+- Extend arms fully without locking elbows.
+- Slowly lower the dumbbells back to the starting position, rotating palms to face you.
+- Maintain a tight core and back straight throughout the exercise.
+- Perform for the desired number of repetitions, ensuring controlled movement.

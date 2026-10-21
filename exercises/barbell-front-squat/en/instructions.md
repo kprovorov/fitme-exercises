@@ -1,0 +1,10 @@
+- Stand with feet shoulder-width apart, toes slightly pointed out.
+- Position barbell on top of the shoulders, securing it with crossed arms or a clean grip.
+- Maintain a neutral spine and an upright torso throughout the movement.
+- Inhale deeply and tighten core muscles.
+- Initiate squat by pushing hips back and bending knees.
+- Lower body until thighs are parallel to the floor or slightly below.
+- Keep elbows up and chest open to maintain bar position.
+- Press through heels to return to standing, exhaling as you rise.
+- Maintain control and balance throughout the movement.
+- Repeat for desired number of repetitions.

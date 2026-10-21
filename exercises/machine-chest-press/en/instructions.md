@@ -1,0 +1,9 @@
+- Adjust the seat and backrest height to align the handles with your chest level.
+- Sit down with your back flat against the backrest and feet planted firmly on the floor.
+- Grasp the handles with an overhand grip, keeping wrists in line with forearms.
+- Push the handles forward by extending your elbows, exhaling as you press.
+- Fully extend your arms without locking elbows.
+- Slowly lower the handles back to the starting position, inhaling as you return.
+- Maintain proper posture with a straight back and engaged core throughout.
+- Complete desired repetitions with controlled movements.
+- Adjust weights as needed for each set.

@@ -1,0 +1,9 @@
+- Stand with your feet shoulder-width apart, holding a dumbbell with both hands.
+- Lift the dumbbell overhead, ensuring your arms are fully extended.
+- Keep your elbows close to your head and point them forward.
+- Engage your core to maintain a straight back and stable posture.
+- Slowly lower the dumbbell behind your head by bending your elbows.
+- Descend until your forearms are parallel to the floor.
+- Pause briefly at the bottom for added control.
+- Push through your triceps to raise the dumbbell back to the starting position.
+- Repeat for desired repetitions, maintaining controlled movements throughout.

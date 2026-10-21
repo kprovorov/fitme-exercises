@@ -1,0 +1,10 @@
+- Adjust the seat height so that handles are at shoulder level.
+- Sit facing the machine with chest against the pad.
+- Firmly grip handles with a neutral or overhand grip.
+- Keep feet flat on the floor and back straight.
+- Slowly exhale while pulling the handles back and outwards.
+- Squeeze shoulder blades together at the motion's peak.
+- Inhale while slowly returning to the starting position.
+- Ensure elbows are slightly bent throughout the movement.
+- Maintain controlled motion to avoid using momentum.
+- Repeat for desired number of reps, maintaining good form.

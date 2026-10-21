@@ -1,0 +1,10 @@
+- Position an incline bench so it provides stable support for your upper arm.
+- Hold a dumbbell in one hand with a neutral grip, thumb facing upward.
+- Rest your upper arm on the bench, ensuring it remains stationary throughout.
+- Begin with your arm fully extended.
+- Curl the dumbbell upward by contracting the bicep, keeping a neutral wrist position.
+- Lift the dumbbell to shoulder height, ensuring peak contraction.
+- Lower the dumbbell back to the starting position in a controlled manner.
+- Repeat for the desired number of repetitions.
+- Switch arms and repeat the process.
+- Maintain a steady pace to avoid using momentum.

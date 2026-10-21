@@ -1,0 +1,9 @@
+- Stand up straight, feet shoulder-width apart, holding a barbell with an overhand grip in front of your thighs.
+- Grip width should be slightly narrower than shoulder-width.
+- Engage your core, keeping back straight, chest lifted.
+- Inhale, and as you exhale, lift the barbell by driving your elbows upward.
+- Keep the bar close to your body, raising it until it nearly touches your chin.
+- Keep elbows above wrists throughout the lift.
+- Pause briefly at the top.
+- Inhale as you slowly lower the barbell back to the starting position.
+- Ensure smooth, controlled motion to minimize joint strain.

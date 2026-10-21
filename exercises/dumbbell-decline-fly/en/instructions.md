@@ -1,0 +1,8 @@
+- Position a decline bench at a 30-degree angle and lie down, securing your feet under the supports.
+- Hold a dumbbell in each hand, palms facing each other, arms extended above your chest.
+- Keep a slight bend in your elbows to avoid joint strain.
+- Slowly lower the dumbbells in an arc out to the sides, feeling a stretch in your chest.
+- Lower until your arms are parallel to the floor or a comfortable stretch is felt.
+- Engage your chest muscles and raise the dumbbells back to the starting position.
+- Ensure controlled movements throughout the exercise.
+- Repeat for the desired number of repetitions.

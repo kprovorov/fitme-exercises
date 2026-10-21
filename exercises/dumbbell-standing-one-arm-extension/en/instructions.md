@@ -1,0 +1,11 @@
+- Stand with feet shoulder-width apart, holding a dumbbell in one hand.
+- Ensure your core is engaged and your spine neutral.
+- Raise the dumbbell overhead, extending your arm fully.
+- Keep your elbow close to your head, ensuring it points forward.
+- With control, lower the dumbbell behind your head by bending your elbow.
+- Avoid moving your upper arm; only your forearm should move.
+- Pause briefly at the bottom of the movement.
+- Extend your arm again, returning to the starting position.
+- Repeat for desired repetitions, then switch arms.
+- Maintain even breathing throughout the exercise.
+- Avoid locking your elbow at the top of the movement.

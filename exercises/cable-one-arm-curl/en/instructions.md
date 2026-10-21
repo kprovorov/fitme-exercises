@@ -1,0 +1,9 @@
+- Attach a single handle to the cable tower at the lowest setting.
+- Stand side-on to the cable machine, feet shoulder-width apart.
+- Grip the handle with one hand, keeping your arm fully extended and palm facing up.
+- Brace your core and keep your elbow close to your body.
+- Exhale, curling the handle up towards your shoulder by bending at the elbow.
+- Pause briefly at the top of the movement, squeezing your bicep.
+- Inhale, slowly lowering the handle back to the start position.
+- Complete the desired number of repetitions before switching arms.
+- Maintain proper posture and avoid using momentum.

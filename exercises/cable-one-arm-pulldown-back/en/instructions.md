@@ -1,0 +1,9 @@
+- Attach a single handle to the high pulley of a cable machine.
+- Stand with feet shoulder-width apart, facing the machine.
+- Grasp the handle with one arm, palm facing your body.
+- Step back slightly to create tension on the cable.
+- Keep your back straight, core engaged, and knees slightly bent.
+- Pull the handle down and to the side towards your hip, keeping your elbow close to your body.
+- Squeeze your back muscles at the bottom of the movement.
+- Slowly return to the starting position with control.
+- Repeat for the desired number of reps, then switch arms.

@@ -1,0 +1,9 @@
+- Attach a rope to a low cable pulley.
+- Stand close to the cable machine with feet shoulder-width apart.
+- Grip the rope with an underhand grip, palms facing each other.
+- Keep elbows close to your sides and back straight.
+- Inhale, then exhale as you bend your elbows, curling the rope towards your shoulders.
+- Squeeze your biceps at the top of the movement.
+- Slowly lower the rope back to the starting position, fully extending your arms.
+- Maintain control throughout the exercise, avoiding swinging or using momentum.
+- Repeat for the desired number of reps, keeping a steady pace.

@@ -1,0 +1,10 @@
+- Stand or sit with a dumbbell in each hand, arms at your sides.
+- Keep feet shoulder-width apart if standing.
+- Maintain a slight bend in the elbows, palms facing inward.
+- Exhale and slowly lift the dumbbells to the side until arms are parallel to the ground.
+- Ensure wrists remain neutral without bending.
+- Keep shoulder blades engaged for stability.
+- Pause briefly at the top of the movement.
+- Inhale and lower dumbbells back to the starting position in a controlled manner.
+- Repeat for the desired number of reps.
+- Ensure core is braced throughout the exercise.

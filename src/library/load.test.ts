@@ -30,6 +30,69 @@ afterEach(async () => {
 });
 
 describe("loadLibrary", () => {
+  it("validates an optional original without adding it to served media", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/original.mp4": lfsPointer(fakeOid("c"), 25_000_000),
+    });
+
+    const result = await loadLibrary(dir, { requireLfsPointers: true });
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.library.exercises[0]).not.toHaveProperty(
+      "original"
+    );
+  });
+
+  it.each([
+    ["original.mp4", "broken", "MP4"],
+    ["original.mp4", lfsPointer(fakeOid("c"), 100_000_001), "100 MB"],
+    ["original.mov", lfsPointer(fakeOid("c"), 100), "unsupported media type"],
+    ["Original.MP4", lfsPointer(fakeOid("c"), 100), "lowercase"],
+  ])(
+    "rejects an invalid archival video %s (%s)",
+    async (file, bytes, message) => {
+      await writeFiles(dir, {
+        ...prefix("bench-press", exerciseFiles()),
+        [`bench-press/${file}`]: bytes,
+      });
+
+      expect(await problems()).toEqual([
+        expect.objectContaining({
+          file: `bench-press/${file}`,
+          message: expect.stringContaining(message),
+        }),
+      ]);
+    }
+  );
+
+  it("requires originals to be LFS pointers in CI", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/original.mp4": mp4(),
+    });
+
+    expect((await loadLibrary(dir)).ok).toBe(true);
+    const result = await loadLibrary(dir, { requireLfsPointers: true });
+    expect(result.ok ? [] : result.problems).toEqual([
+      expect.objectContaining({
+        file: "bench-press/original.mp4",
+        message: expect.stringContaining("not a Git LFS pointer"),
+      }),
+    ]);
+  });
+
+  it("rejects symlinked originals", async () => {
+    await writeFiles(dir, prefix("bench-press", exerciseFiles()));
+    await symlink("video.mp4", join(dir, "bench-press/original.mp4"));
+
+    expect(await problems()).toEqual([
+      expect.objectContaining({
+        file: "bench-press/original.mp4",
+        message: expect.stringContaining("symlinks aren't allowed"),
+      }),
+    ]);
+  });
+
   it("returns the validated Exercise Library", async () => {
     await writeFiles(dir, {
       ...prefix("squat", exerciseFiles("Squat")),

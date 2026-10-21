@@ -1,0 +1,9 @@
+- Sit on a bench with back support, feet flat on the floor, and core engaged.
+- Hold a dumbbell in each hand at shoulder height, palms facing forward.
+- Maintain a neutral wrist position with elbows slightly bent.
+- Press the dumbbells overhead, extending arms fully without locking elbows.
+- Keep your head neutral and spine straight throughout the movement.
+- Lower dumbbells back to starting position smoothly, elbows at shoulder level.
+- Avoid using momentum; move in a controlled manner.
+- Exhale while pressing up and inhale while lowering dumbbells.
+- Repeat for desired number of repetitions, maintaining form.

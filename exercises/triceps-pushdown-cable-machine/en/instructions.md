@@ -1,0 +1,10 @@
+- Stand facing the cable machine with feet shoulder-width apart.
+- Set the pulley to the highest position and attach a straight or V-bar handle.
+- Grab the handle with an overhand grip, keeping elbows close to your sides.
+- Set your body upright, core engaged, and slightly bend your knees.
+- Start with elbows at a 90-degree angle.
+- Push the handle down by extending your arms, keeping elbows stationary.
+- Fully extend arms, but avoid locking elbows.
+- Slowly return handle to the starting position.
+- Maintain a controlled movement throughout the exercise.
+- Repeat for desired reps, keeping a steady breathing pattern.

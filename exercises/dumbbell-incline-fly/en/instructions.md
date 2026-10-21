@@ -1,0 +1,8 @@
+- Begin by adjusting an incline bench to a 30-45 degree angle.
+- Sit on the bench, holding a dumbbell in each hand with an overhand grip.
+- Lie back with the dumbbells resting atop your thighs.
+- Use your thighs to help lift the dumbbells as you lie back fully, positioning them over your chest with arms extended.
+- Keep a slight bend in your elbows and lower the weights out to your sides in a wide arc.
+- Stretch until you feel a slight pull in your chest.
+- Return to the starting position by bringing the dumbbells together over your chest.
+- Repeat for the desired number of reps.
