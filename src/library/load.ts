@@ -3,13 +3,14 @@ import { extname, join } from "node:path";
 import type { z } from "zod";
 import { type MediaFormat, readMedia } from "./media";
 import { ExerciseMetadata, LocaleMetadata } from "./schema";
-import type {
-  Exercise,
-  ExerciseText,
-  LoadResult,
-  Locale,
-  Media,
-  Problem,
+import {
+  type Exercise,
+  type ExerciseText,
+  type LoadResult,
+  type Locale,
+  type Media,
+  type Problem,
+  TRANSLATIONS,
 } from "./types";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -58,7 +59,11 @@ export interface LoadOptions {
   requireLfsPointers?: boolean;
 }
 
-const EXERCISE_ENTRIES = new Set(["metadata.json", "en"]);
+const EXERCISE_ENTRIES = new Set<string>([
+  "metadata.json",
+  "en",
+  ...TRANSLATIONS,
+]);
 const LOCALE_ENTRIES = new Set([
   "metadata.json",
   "description.md",
@@ -157,10 +162,20 @@ const loadExercise = async (
           MEDIA_NAMES.has(stripExtension(name).toLowerCase())
         )
     ),
-    "an Exercise folder holds only metadata.json, en/, a thumbnail, a video and an optional original.mp4"
+    `an Exercise folder holds only metadata.json, en/, optional translations (${TRANSLATIONS.map((locale) => `${locale}/`).join(", ")}), a thumbnail, a video and an optional original.mp4`
   );
   const metadata = await readJson(folder, "metadata.json", ExerciseMetadata);
   const en = await readLocale(folder, "en");
+  const translations: Partial<Record<Locale, ExerciseText>> = {};
+  for (const locale of TRANSLATIONS) {
+    if (files.includes(locale)) {
+      // biome-ignore lint/performance/noAwaitInLoops: keeps problems in order
+      const text = await readLocale(folder, locale);
+      if (text) {
+        translations[locale] = text;
+      }
+    }
+  }
   const thumbnail = await readMediaKind(folder, files, THUMBNAIL);
   const video = await readMediaKind(folder, files, VIDEO);
   await readMediaKind(folder, files, ORIGINAL_VIDEO);
@@ -169,7 +184,7 @@ const loadExercise = async (
     return { problems };
   }
   const exercise: Exercise = {
-    locales: { en },
+    locales: { en, ...translations },
     muscle_groups: metadata.muscle_groups,
     slug,
     thumbnail,

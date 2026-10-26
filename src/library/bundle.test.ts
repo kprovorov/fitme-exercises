@@ -37,6 +37,22 @@ describe("bundleLibrary", () => {
     expect(withOriginal).toEqual(withoutOriginal);
   });
 
+  it("keeps translations out of the published bundle", async () => {
+    const files = prefix("bench-press", exerciseFiles());
+    const withoutTranslation = await bundleFiles(files);
+    const withTranslation = await bundleFiles({
+      ...files,
+      ...prefix("bench-press/uk", {
+        "description.md": "Базова жимова вправа.\n",
+        "instructions.md": "- Ляжте на лаву.\n",
+        "metadata.json": JSON.stringify({ name: "Жим лежачи" }),
+      }),
+    });
+
+    expect(withoutTranslation.ok).toBe(true);
+    expect(withTranslation).toEqual(withoutTranslation);
+  });
+
   it("bundles the fixture Exercise Library as library.json version 1", async () => {
     // A copy of the monorepo's apps/exercises/fixtures/library.json: the
     // bundle the API's build accepts for these Exercises.

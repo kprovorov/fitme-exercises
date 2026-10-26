@@ -136,6 +136,51 @@ describe("loadLibrary", () => {
     });
   });
 
+  it("loads an optional translation next to en", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      ...prefix("squat", exerciseFiles("Squat")),
+      ...prefix("bench-press/uk", {
+        "description.md": "Базова жимова вправа.\n",
+        "instructions.md": "- Ляжте на лаву.\n",
+        "metadata.json": JSON.stringify({ name: "Жим лежачи" }),
+      }),
+    });
+
+    const result = await loadLibrary(dir);
+
+    expect(result.ok && result.library.exercises.map((e) => e.locales)).toEqual(
+      [
+        {
+          en: expect.objectContaining({ name: "Bench Press" }),
+          uk: {
+            description: "Базова жимова вправа.\n",
+            instructions: "- Ляжте на лаву.\n",
+            name: "Жим лежачи",
+          },
+        },
+        { en: expect.objectContaining({ name: "Squat" }) },
+      ]
+    );
+  });
+
+  it("validates a translation like en", async () => {
+    await writeFiles(dir, {
+      ...prefix("bench-press", exerciseFiles()),
+      "bench-press/uk/metadata.json": JSON.stringify({ name: "Жим лежачи" }),
+      "bench-press/uk/notes.md": "чернетка\n",
+    });
+
+    expect(await problems()).toEqual([
+      expect.objectContaining({
+        file: "bench-press/uk/notes.md",
+        message: expect.stringContaining("unexpected file"),
+      }),
+      expect.objectContaining({ file: "bench-press/uk/description.md" }),
+      expect.objectContaining({ file: "bench-press/uk/instructions.md" }),
+    ]);
+  });
+
   it.each([
     "Bench-Press",
     "bench_press",

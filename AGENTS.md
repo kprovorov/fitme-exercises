@@ -60,6 +60,7 @@ pnpm release plan|upload|publish  # the release's steps; only the release workfl
 
 - No URLs, sizes or paths: both sides derive a media object's path as `<slug>/<oid>.<ext>`, and the API resolves URLs on its Supabase project.
 - Exercises are sorted by Exercise slug.
+- **Only `en` for now:** translations (`uk/`) are validated but left out of the bundle until the monorepo's bundle schema accepts them.
 - **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. The release bundles first, before it pulls the LFS content it uploads. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
 - A format change touches both repos: the monorepo's schema first (it rejects anything it doesn't know), then `src/library/bundle.ts` here. `src/library/bundle.test.ts` bundles `fixtures/library/` and compares the result with `fixtures/library.json`, a copy of the monorepo's `apps/exercises/fixtures/library.json`: keep the two copies equal.
 
@@ -94,7 +95,8 @@ Merging a pull request to `main` is a content release. `.github/workflows/releas
 exercises/
   bench-press/                 the Exercise slug
     metadata.json              { "muscle_groups": ["chest", "triceps"] }: language-independent
-    en/                        a locale folder (only `en` for now)
+    en/                        a locale folder: `en` is required
+    uk/                        an optional translation, same three files (`TRANSLATIONS` in src/library/types.ts)
       metadata.json            { "name": "Bench Press" }
       description.md
       instructions.md
@@ -107,7 +109,7 @@ exercises/
 - Muscle groups must come from `src/library/muscle-groups.ts`, at least one, no repeats. That enum mirrors `muscleGroups` in the monorepo's `@fitme/core`: a new muscle group goes into `@fitme/core` first (the API rejects a bundle with a muscle group it doesn't know), then into the enum here.
 - Metadata and markdown files must be valid UTF-8. Metadata files are strict: unknown keys are problems. New fields are added to the schema first.
 - Media extensions are lowercase: `thumbnail.jpg` (not `.jpeg` or `.JPG`), `thumbnail.png`, `thumbnail.webp`, `video.mp4`. Exactly one thumbnail and one video per Exercise.
-- An Exercise folder holds only `metadata.json`, `en/`, a thumbnail, a video and an optional `original.mp4`; a locale folder holds only its three files. Originals are validated (including the CI LFS-pointer requirement) but excluded from the served media, release uploads and bundle. Anything else is an unexpected file. Symlinks aren't allowed anywhere in an Exercise.
+- An Exercise folder holds only `metadata.json`, `en/`, optional translation folders (`uk/`), a thumbnail, a video and an optional `original.mp4`; a locale folder holds only its three files. Originals are validated (including the CI LFS-pointer requirement) but excluded from the served media, release uploads and bundle. Anything else is an unexpected file. Symlinks aren't allowed anywhere in an Exercise.
 - Files and folders starting with `.` are ignored. Anything else at the top of `exercises/` that isn't a folder (including a symlink) is a problem.
 
 Every problem names the Exercise and the file, e.g. `bench-press/metadata.json: unknown muscle group "neck"`.
