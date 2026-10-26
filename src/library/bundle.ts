@@ -28,7 +28,8 @@ export const bundleLibrary = async (root: string): Promise<BundleResult> => {
   }
   const bundle = {
     exercises: result.library.exercises.map((exercise) => ({
-      locales: exercise.locales,
+      // Only `en` until the monorepo's bundle schema accepts translations.
+      locales: { en: exercise.locales.en },
       muscle_groups: exercise.muscle_groups,
       slug: exercise.slug,
       thumbnail: bundleMedia(exercise.thumbnail),

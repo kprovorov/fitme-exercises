@@ -1,7 +1,7 @@
 - Sit on a bench or chair with your forearms resting on your thighs, palms facing up.
 - Grasp a dumbbell in each hand with a relaxed grip.
 - Ensure your wrists are just beyond the edge of your thighs, allowing a full range of motion.
-- Start with wrists extended and slowly lower the weights to flex your wrists fully.
+- Start with wrists straight, then slowly lower the weights, extending your wrists fully.
 - Curl the weights back up by flexing your wrists, squeezing at the top.
 - Keep forearms stationary throughout the movement.
 - Perform the exercise slowly and with control.

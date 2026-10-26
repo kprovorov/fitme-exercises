@@ -1,7 +1,9 @@
 import type { MuscleGroup } from "./muscle-groups";
 
-/** Only `en` for now; adding a language adds a locale folder. */
-export type Locale = "en";
+/** Every Exercise has `en`; the other locales are optional translations. */
+export const TRANSLATIONS = ["uk"] as const;
+
+export type Locale = "en" | (typeof TRANSLATIONS)[number];
 
 export interface Media {
   contentType: string;
@@ -21,7 +23,7 @@ export interface ExerciseText {
 }
 
 export interface Exercise {
-  locales: Record<Locale, ExerciseText>;
+  locales: { en: ExerciseText } & Partial<Record<Locale, ExerciseText>>;
   muscle_groups: MuscleGroup[];
   slug: string;
   thumbnail: Media;

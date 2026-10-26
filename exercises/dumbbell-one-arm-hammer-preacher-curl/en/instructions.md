@@ -1,4 +1,4 @@
-- Position an incline bench so it provides stable support for your upper arm.
+- Position a preacher bench so it provides stable support for your upper arm.
 - Hold a dumbbell in one hand with a neutral grip, thumb facing upward.
 - Rest your upper arm on the bench, ensuring it remains stationary throughout.
 - Begin with your arm fully extended.

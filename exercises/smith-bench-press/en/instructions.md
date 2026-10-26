@@ -5,5 +5,5 @@
 - Lower the bar slowly to your mid-chest, inhaling during descent.
 - Pause briefly as the bar touches your chest gently.
 - Press the bar upward, fully extending your arms and exhaling.
-- Lock out your elbows briefly at the top and then repeat.
+- Pause briefly at the top with your arms fully extended, then repeat.
 - Perform the desired number of repetitions, then rack the bar securely.

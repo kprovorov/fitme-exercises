@@ -1,1 +1,1 @@
-Lift barbell vertically to chin with hands shoulder-width apart.
+Lift barbell vertically to chin with hands slightly narrower than shoulder-width.
