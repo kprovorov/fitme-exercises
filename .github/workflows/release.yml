@@ -1,7 +1,7 @@
 name: Release
 
 # Every merge to main is a content release, strictly in order: validate, upload
-# the new media, publish library.json, redeploy apps/exercises. A live
+# the new media, publish library.json, redeploy apps/library. A live
 # deployment never points at media that isn't uploaded. Any failing step stops
 # the release; a re-run is safe (uploaded objects are skipped, and the bundle
 # and the deploy hook are idempotent).
@@ -100,7 +100,7 @@ jobs:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
 
       # Vercel rebuilds the monorepo's main, which bakes in the new bundle.
-      - name: Redeploy apps/exercises
+      - name: Redeploy apps/library
         # The hook only queues the build (a PENDING job); its outcome is in
         # Vercel. Watching it would need a Vercel token, which this repo
         # doesn't hold.

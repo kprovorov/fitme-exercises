@@ -3,8 +3,8 @@ import type { Media, Problem } from "./types";
 
 /**
  * The `library.json` format version. The bundle is the contract with the
- * monorepo's `apps/exercises`, whose build validates it against its own
- * schema (`apps/exercises/src/bundle.ts`): change both together.
+ * monorepo's `apps/library`, whose build validates it against its own
+ * schema (`apps/library/src/bundle.ts`): change both together.
  */
 export const BUNDLE_VERSION = 1;
 
@@ -28,8 +28,7 @@ export const bundleLibrary = async (root: string): Promise<BundleResult> => {
   }
   const bundle = {
     exercises: result.library.exercises.map((exercise) => ({
-      // Only `en` until the monorepo's bundle schema accepts translations.
-      locales: { en: exercise.locales.en },
+      locales: exercise.locales,
       muscle_groups: exercise.muscle_groups,
       slug: exercise.slug,
       thumbnail: bundleMedia(exercise.thumbnail),
