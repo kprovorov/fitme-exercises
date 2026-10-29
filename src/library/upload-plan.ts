@@ -19,7 +19,7 @@ export interface PlannedUpload {
 
 /**
  * The object key of a media file: `<slug>/<oid>.<ext>`. Part of the contract
- * with the monorepo's `apps/exercises`, which builds the same paths into its
+ * with the monorepo's `apps/library`, which builds the same paths into its
  * media URLs (`mediaObjectPath` in `src/served-library.ts`): change both
  * together.
  */

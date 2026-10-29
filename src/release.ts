@@ -33,7 +33,7 @@ const PLAN_PATH = resolve(ROOT, "dist/upload-plan.json");
 const BUNDLE_PATH = resolve(ROOT, "dist/library.json");
 /** The public Supabase Storage bucket media is served from. */
 const MEDIA_BUCKET = "exercise-media";
-/** The pathname `apps/exercises`' build reads the bundle from. */
+/** The pathname `apps/library`'s build reads the bundle from. */
 const LIBRARY_BLOB = "library.json";
 
 const env = (name: string) => {
@@ -133,7 +133,7 @@ const uploadStep = async () => {
 
 /**
  * Overwrites the fixed pathname. The Blob CDN may serve the previous version
- * for a while, but `apps/exercises`' build reads it with `useCache: false`
+ * for a while, but `apps/library`'s build reads it with `useCache: false`
  * (from origin storage), so the build the hook starts gets this one.
  */
 const publishStep = async () => {

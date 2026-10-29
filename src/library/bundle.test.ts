@@ -37,24 +37,34 @@ describe("bundleLibrary", () => {
     expect(withOriginal).toEqual(withoutOriginal);
   });
 
-  it("keeps translations out of the published bundle", async () => {
-    const files = prefix("bench-press", exerciseFiles());
-    const withoutTranslation = await bundleFiles(files);
-    const withTranslation = await bundleFiles({
-      ...files,
+  it("bundles each translation under its locale, and none where it's missing", async () => {
+    const result = await bundleFiles({
+      ...prefix("bench-press", exerciseFiles()),
       ...prefix("bench-press/uk", {
         "description.md": "Базова жимова вправа.\n",
         "instructions.md": "- Ляжте на лаву.\n",
         "metadata.json": JSON.stringify({ name: "Жим лежачи" }),
       }),
+      ...prefix("squat", exerciseFiles()),
     });
 
-    expect(withoutTranslation.ok).toBe(true);
-    expect(withTranslation).toEqual(withoutTranslation);
+    expect(result.ok).toBe(true);
+    const exercises: { locales: Record<string, unknown> }[] = result.ok
+      ? JSON.parse(result.json).exercises
+      : [];
+    expect(exercises.map(({ locales }) => Object.keys(locales))).toEqual([
+      ["en", "uk"],
+      ["en"],
+    ]);
+    expect(exercises[0].locales.uk).toEqual({
+      description: "Базова жимова вправа.\n",
+      instructions: "- Ляжте на лаву.\n",
+      name: "Жим лежачи",
+    });
   });
 
   it("bundles the fixture Exercise Library as library.json version 1", async () => {
-    // A copy of the monorepo's apps/exercises/fixtures/library.json: the
+    // A copy of the monorepo's apps/library/fixtures/library.json: the
     // bundle the API's build accepts for these Exercises.
     const expected = JSON.parse(
       await readFile(resolve(FIXTURES, "library.json"), "utf8")
