@@ -6,14 +6,22 @@ const KnownMuscleGroup = z.enum(muscleGroups, {
     `unknown muscle group ${JSON.stringify(issue.input)} (known: ${muscleGroups.join(", ")})`,
 });
 
+/** At least one known muscle group, none repeated. */
+const MuscleGroups = z
+  .array(KnownMuscleGroup)
+  .nonempty()
+  .refine((groups) => new Set(groups).size === groups.length, {
+    error: "muscle groups must not repeat",
+  });
+
 /** `<slug>/metadata.json`: language-independent metadata. */
 export const ExerciseMetadata = z.strictObject({
-  muscle_groups: z
-    .array(KnownMuscleGroup)
-    .nonempty()
-    .refine((groups) => new Set(groups).size === groups.length, {
-      error: "muscle groups must not repeat",
-    }),
+  muscle_groups: MuscleGroups,
+});
+
+/** `covers/<id>/metadata.json`: the muscle groups a Cover suits. */
+export const CoverMetadata = z.strictObject({
+  muscle_groups: MuscleGroups,
 });
 
 /** `<slug>/<locale>/metadata.json`: text that is translated. */

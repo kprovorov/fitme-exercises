@@ -1,6 +1,10 @@
-# Exercise media lives in Git LFS. The loader reads each file's content hash
-# (the LFS oid) from its pointer, so CI never downloads LFS content.
+# Exercise and Cover media lives in Git LFS. The loader reads each file's
+# content hash (the LFS oid) from its pointer, so CI never downloads LFS
+# content.
 exercises/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 exercises/**/*.png filter=lfs diff=lfs merge=lfs -text
 exercises/**/*.webp filter=lfs diff=lfs merge=lfs -text
 exercises/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+covers/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+covers/**/*.png filter=lfs diff=lfs merge=lfs -text
+covers/**/*.webp filter=lfs diff=lfs merge=lfs -text

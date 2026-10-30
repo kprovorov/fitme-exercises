@@ -1,34 +1,67 @@
 import type { Media } from "./types";
 
-/** A media file of the Exercise Library, with the Exercise slug it belongs to. */
-export type ReleaseMedia = Pick<
-  Media,
-  "contentType" | "extension" | "oid" | "path"
-> & { slug: string };
+/** A media file a release may upload, and where its object goes. */
+export interface ReleaseMedia
+  extends Pick<Media, "contentType" | "extension" | "oid"> {
+  /** The bucket folder its object goes in: `<slug>` or `covers/<id>`. */
+  dir: string;
+  /** The media file, relative to the repo root. */
+  path: string;
+}
+
+type LoadedMedia = Pick<Media, "contentType" | "extension" | "oid" | "path">;
+
+/** An Exercise's media file (loaded from `exercises/`): its objects go under `<slug>/`. */
+export const exerciseMedia = (
+  slug: string,
+  { contentType, extension, oid, path }: LoadedMedia
+): ReleaseMedia => ({
+  contentType,
+  dir: slug,
+  extension,
+  oid,
+  path: `exercises/${path}`,
+});
+
+/**
+ * A Cover's image (loaded from `covers/`): its objects go under
+ * `covers/<id>/`, apart from Exercise media (`coverObjectPath` in the
+ * monorepo's `apps/library/src/served-library.ts`).
+ */
+export const coverMedia = (
+  id: string,
+  { contentType, extension, oid, path }: LoadedMedia
+): ReleaseMedia => ({
+  contentType,
+  dir: `covers/${id}`,
+  extension,
+  oid,
+  path: `covers/${path}`,
+});
 
 /** An object the release uploads to the `exercise-media` bucket. */
 export interface PlannedUpload {
   cacheControl: string;
   contentType: string;
-  /** The object key: `<slug>/<oid>.<ext>`. */
+  /** The object key: `<slug>/<oid>.<ext>` or `covers/<id>/<oid>.<ext>`. */
   key: string;
   oid: string;
-  /** The media file it is uploaded from, relative to the Exercise Library root. */
+  /** The media file it is uploaded from, relative to the repo root. */
   path: string;
 }
 
 /**
- * The object key of a media file: `<slug>/<oid>.<ext>`. Part of the contract
+ * The object key of a media file: `<dir>/<oid>.<ext>`. Part of the contract
  * with the monorepo's `apps/library`, which builds the same paths into its
- * media URLs (`mediaObjectPath` in `src/served-library.ts`): change both
- * together.
+ * media URLs (`mediaObjectPath` and `coverObjectPath` in
+ * `src/served-library.ts`): change both together.
  */
 export const mediaKey = ({
+  dir,
   extension,
   oid,
-  slug,
-}: Pick<ReleaseMedia, "extension" | "oid" | "slug">) =>
-  `${slug}/${oid}.${extension}`;
+}: Pick<ReleaseMedia, "dir" | "extension" | "oid">) =>
+  `${dir}/${oid}.${extension}`;
 
 /** Objects are content-addressed, so they never change: cache them forever. */
 export const MEDIA_CACHE_CONTROL = "public, max-age=31536000, immutable";

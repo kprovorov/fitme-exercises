@@ -743,6 +743,18 @@ describe("loadLibrary", () => {
       expect.objectContaining({ exercise: "squat", file: "squat/video.mp4" }),
     ]);
   });
+
+  it("reserves the Exercise slug covers for Cover images", async () => {
+    await writeFiles(dir, prefix("covers", exerciseFiles()));
+
+    expect(await problems()).toEqual([
+      {
+        exercise: "covers",
+        file: "covers",
+        message: expect.stringContaining("reserved"),
+      },
+    ]);
+  });
 });
 
 async function problems() {

@@ -7,8 +7,13 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { put } from "@vercel/blob";
-import { loadLibrary } from "./library/load";
-import { type PlannedUpload, planUploads } from "./library/upload-plan";
+import { loadContent } from "./library/content";
+import {
+  coverMedia,
+  exerciseMedia,
+  type PlannedUpload,
+  planUploads,
+} from "./library/upload-plan";
 import { reportProblems } from "./report";
 
 /**
@@ -28,7 +33,6 @@ import { reportProblems } from "./report";
  * (`src/library/upload-plan.ts`).
  */
 const ROOT = resolve(import.meta.dirname, "..");
-const LIBRARY_DIR = "exercises";
 const PLAN_PATH = resolve(ROOT, "dist/upload-plan.json");
 const BUNDLE_PATH = resolve(ROOT, "dist/library.json");
 /** The public Supabase Storage bucket media is served from. */
@@ -70,20 +74,20 @@ const listKeys = async (client: S3Client) => {
 };
 
 const planStep = async () => {
-  const result = await loadLibrary(resolve(ROOT, LIBRARY_DIR), {
-    requireLfsPointers: true,
-  });
+  const result = await loadContent(ROOT, { requireLfsPointers: true });
   if (!result.ok) {
     reportProblems(result.problems);
     process.exitCode = 1;
     return;
   }
-  const media = result.library.exercises.flatMap((exercise) =>
-    [exercise.thumbnail, exercise.video].map((file) => ({
-      ...file,
-      slug: exercise.slug,
-    }))
-  );
+  const media = [
+    ...result.exercises.flatMap((exercise) =>
+      [exercise.thumbnail, exercise.video].map((file) =>
+        exerciseMedia(exercise.slug, file)
+      )
+    ),
+    ...result.covers.map((cover) => coverMedia(cover.id, cover.image)),
+  ];
   const uploads = planUploads(media, await listKeys(s3Client()));
 
   await mkdir(dirname(PLAN_PATH), { recursive: true });
@@ -95,9 +99,7 @@ const planStep = async () => {
   const output = process.env.GITHUB_OUTPUT;
   if (output) {
     // The repo paths `git lfs pull --include` fetches: only the planned files.
-    const include = uploads
-      .map((upload) => `${LIBRARY_DIR}/${upload.path}`)
-      .join(",");
+    const include = uploads.map((upload) => upload.path).join(",");
     await appendFile(output, `count=${uploads.length}\ninclude=${include}\n`);
   }
 };
@@ -110,7 +112,7 @@ const uploadStep = async () => {
   // One at a time, so at most one media file is in memory.
   for (const planned of uploads) {
     // biome-ignore lint/performance/noAwaitInLoops: bounds memory, see above
-    const content = await readFile(resolve(ROOT, LIBRARY_DIR, planned.path));
+    const content = await readFile(resolve(ROOT, planned.path));
     const sha256 = createHash("sha256").update(content).digest("hex");
     if (sha256 !== planned.oid) {
       throw new Error(

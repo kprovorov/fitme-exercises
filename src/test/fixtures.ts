@@ -19,7 +19,15 @@ export const exerciseFiles = (
   "video.mp4": lfsPointer(fakeOid("b"), 4096),
 });
 
-/** Puts an Exercise folder's files under `<slug>/`. */
+/** A valid Cover folder as a map of relative path → file content. */
+export const coverFiles = (
+  muscleGroups: string[]
+): Record<string, string | Uint8Array> => ({
+  "image.jpg": lfsPointer(fakeOid("d"), 2048),
+  "metadata.json": JSON.stringify({ muscle_groups: muscleGroups }),
+});
+
+/** Puts an Exercise or Cover folder's files under `<name>/`. */
 export const prefix = (
   slug: string,
   files: Record<string, string | Uint8Array>
