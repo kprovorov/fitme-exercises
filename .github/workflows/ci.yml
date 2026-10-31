@@ -40,9 +40,9 @@ jobs:
 
       # Runs on pull requests only: a workflow_call (release) has no base
       # branch to compare with.
-      - name: Check no Exercise slug was removed
+      - name: Check no Exercise slug or Cover id was removed
         if: github.event_name == 'pull_request'
-        run: scripts/check-exercise-slugs.sh "origin/$BASE_REF"
+        run: scripts/check-permanent-ids.sh "origin/$BASE_REF"
         env:
           BASE_REF: ${{ github.base_ref }}
 
@@ -52,9 +52,9 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Validate the Exercise Library
+      - name: Validate the Library (Exercises and Covers)
         run: pnpm validate --require-lfs-pointers
 
       # The bundle the release publishes, from the LFS pointers alone.
-      - name: Bundle the Exercise Library
+      - name: Bundle the Library
         run: pnpm bundle

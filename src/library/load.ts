@@ -1,3 +1,4 @@
+import type { Dirent } from "node:fs";
 import { lstat, readdir, readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import type { z } from "zod";
@@ -14,20 +15,22 @@ import {
 } from "./types";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+/** Cover images live under `covers/` in the bucket, so no Exercise may take it. */
+const RESERVED_SLUGS = new Set(["covers"]);
 
 const MB = 1000 * 1000;
 const MEGAPIXEL = 1000 * 1000;
 
-interface MediaKind {
+export interface MediaKind {
   contentTypes: Record<string, string>;
   format: MediaFormat;
   maxPixels?: number;
   maxSize: number;
-  name: "thumbnail" | "video" | "original";
+  name: "thumbnail" | "video" | "original" | "image";
   required?: boolean;
 }
 
-const THUMBNAIL: MediaKind = {
+export const THUMBNAIL: MediaKind = {
   contentTypes: { jpg: "image/jpeg", png: "image/png", webp: "image/webp" },
   format: "image",
   maxPixels: 50 * MEGAPIXEL,
@@ -74,14 +77,57 @@ const MEDIA_NAMES = new Set(["thumbnail", "video", "original"]);
 const stripExtension = (name: string) =>
   name.slice(0, name.length - extname(name).length);
 
-/** One Exercise folder being read, and where its problems go. */
-interface Folder {
+/** Whether `name` is a candidate media file for `kind` (any extension or case). */
+export const isMediaName = (name: string, kind: Pick<MediaKind, "name">) =>
+  stripExtension(name).toLowerCase() === kind.name;
+
+/** One Exercise or Cover folder being read, and where its problems go. */
+export interface Folder {
   dir: string;
+  /** The folder's name: the Exercise slug or the Cover id. */
+  name: string;
   options: LoadOptions;
   /** Reports a problem with `file` (relative to the folder; "" is the folder itself). */
   report: (file: string, message: string) => void;
-  slug: string;
 }
+
+/** One folder's result: what it loaded, or its problems. */
+export interface FolderResult<T> {
+  item?: T;
+  problems: Problem[];
+}
+
+/**
+ * Loads each folder in `entries` (dot entries ignored, by name) with `load`,
+ * one at a time so media files are read sequentially to bound memory. An
+ * entry that isn't a folder (including a symlink) is `notAFolder`'s problem.
+ */
+export const loadFolders = async <T>(
+  entries: Dirent[],
+  load: (name: string) => Promise<FolderResult<T>>,
+  notAFolder: (name: string) => Problem
+): Promise<{ ok: true; items: T[] } | { ok: false; problems: Problem[] }> => {
+  const sorted = entries
+    .filter((entry) => !entry.name.startsWith("."))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const loaded: FolderResult<T>[] = [];
+  for (const entry of sorted) {
+    loaded.push(
+      entry.isDirectory()
+        ? // biome-ignore lint/performance/noAwaitInLoops: bounds memory, see above
+          await load(entry.name)
+        : { problems: [notAFolder(entry.name)] }
+    );
+  }
+  const problems = loaded.flatMap((result) => result.problems);
+  if (problems.length > 0) {
+    return { ok: false, problems };
+  }
+  return {
+    items: loaded.flatMap((result) => (result.item ? [result.item] : [])),
+    ok: true,
+  };
+};
 
 /**
  * Reads every Exercise folder under `root` and returns either the validated
@@ -91,47 +137,29 @@ export const loadLibrary = async (
   root: string,
   options: LoadOptions = {}
 ): Promise<LoadResult> => {
-  const entries = (await readdir(root, { withFileTypes: true }))
-    .filter((entry) => !entry.name.startsWith("."))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  // One Exercise at a time; media files are read sequentially to bound memory.
-  const loaded: { exercise?: Exercise; problems: Problem[] }[] = [];
-  for (const entry of entries) {
-    loaded.push(
-      entry.isDirectory()
-        ? // biome-ignore lint/performance/noAwaitInLoops: bounds memory, see above
-          await loadExercise(root, entry.name, options)
-        : {
-            problems: [
-              {
-                exercise: entry.name,
-                file: entry.name,
-                message: "not an Exercise folder",
-              },
-            ],
-          }
-    );
-  }
-
-  const problems = loaded.flatMap((result) => result.problems);
-  if (problems.length > 0) {
-    return { ok: false, problems };
-  }
-  const exercises = loaded.flatMap((result) =>
-    result.exercise ? [result.exercise] : []
+  const result = await loadFolders(
+    await readdir(root, { withFileTypes: true }),
+    (slug) => loadExercise(root, slug, options),
+    (name) => ({
+      exercise: name,
+      file: name,
+      message: "not an Exercise folder",
+    })
   );
-  return { library: { exercises }, ok: true };
+  return result.ok
+    ? { library: { exercises: result.items }, ok: true }
+    : result;
 };
 
 const loadExercise = async (
   root: string,
   slug: string,
   options: LoadOptions
-): Promise<{ exercise?: Exercise; problems: Problem[] }> => {
+): Promise<FolderResult<Exercise>> => {
   const problems: Problem[] = [];
   const folder: Folder = {
     dir: join(root, slug),
+    name: slug,
     options,
     report: (file, message) =>
       problems.push({
@@ -139,13 +167,18 @@ const loadExercise = async (
         file: file ? `${slug}/${file}` : slug,
         message,
       }),
-    slug,
   };
 
   if (!SLUG_PATTERN.test(slug)) {
     folder.report(
       "",
       `invalid Exercise slug: must match ${SLUG_PATTERN.source} (lowercase letters and digits, words joined by single hyphens)`
+    );
+  }
+  if (RESERVED_SLUGS.has(slug)) {
+    folder.report(
+      "",
+      `the Exercise slug "${slug}" is reserved: Cover images use its folder in the media bucket`
     );
   }
 
@@ -190,7 +223,7 @@ const loadExercise = async (
     thumbnail,
     video,
   };
-  return { exercise, problems };
+  return { item: exercise, problems };
 };
 
 /** Reads a file, reporting it as missing (or as a folder) instead of throwing. */
@@ -236,7 +269,7 @@ const readText = async (folder: Folder, file: string) => {
   }
 };
 
-const readJson = async <T extends z.ZodType>(
+export const readJson = async <T extends z.ZodType>(
   folder: Folder,
   file: string,
   schema: T
@@ -315,9 +348,7 @@ const findMediaFile = (
   kind: MediaKind
 ): { file: string; extension: string; contentType: string } | undefined => {
   const allowed = Object.keys(kind.contentTypes);
-  const candidates = files.filter(
-    (name) => stripExtension(name).toLowerCase() === kind.name
-  );
+  const candidates = files.filter((name) => isMediaName(name, kind));
 
   if (candidates.length === 0) {
     if (kind.required !== false) {
@@ -356,7 +387,7 @@ const findMediaFile = (
   return { contentType, extension, file };
 };
 
-const readMediaKind = async (
+export const readMediaKind = async (
   folder: Folder,
   files: string[],
   kind: MediaKind
@@ -423,12 +454,12 @@ const readMediaKind = async (
     contentType,
     extension,
     oid,
-    path: `${folder.slug}/${file}`,
+    path: `${folder.name}/${file}`,
     size,
   };
 };
 
-const reportUnexpected = (
+export const reportUnexpected = (
   folder: Folder,
   dir: string,
   names: string[],

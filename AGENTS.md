@@ -4,23 +4,26 @@ This file provides guidance to coding agents when working with code in this repo
 
 ## What this repo is
 
-`fitme-exercises` is the private content repo of the **Exercise Library**: its content (metadata and markdown) and media (Git LFS), the loader that validates it, and the tooling that publishes it as a `library.json` bundle. The Exercise Library API isn't here: it's `apps/library` in the Fitme monorepo (served from `exercises.fitmeproject.com`), built from the bundle this repo publishes. Same tooling as the monorepo: pnpm, Node 24, TypeScript, vitest, ultracite (Biome).
+`fitme-exercises` is the private content repo of the **Library**: every Exercise and every Cover, their content (metadata and markdown) and media (Git LFS), the loaders that validate them, and the tooling that publishes them as a `library.json` bundle. The Exercise Library API isn't here: it's `apps/library` in the Fitme monorepo (served from `exercises.fitmeproject.com`), built from the bundle this repo publishes. Same tooling as the monorepo: pnpm, Node 24, TypeScript, vitest, ultracite (Biome).
 
 ```
 exercises/<slug>/         one folder per Exercise, named after its Exercise slug (see Content layout)
-src/library/load.ts       loadLibrary(dir): the validated Exercise Library or a list of problems
-src/library/bundle.ts     bundleLibrary(dir): the library.json bundle or the loader's problems
+covers/<id>/              one folder per Cover, named after its Cover id (see Covers)
+src/library/load.ts       loadLibrary(dir): the validated Exercises (exercises/) or a list of problems
+src/library/covers.ts     loadCovers(dir): the validated Covers (covers/; none when it's missing) or a list of problems
+src/library/content.ts    loadContent(root): both, from <root>/exercises and <root>/covers
+src/library/bundle.ts     bundleLibrary(root): the library.json bundle or the loaders' problems
 src/library/media.ts      reads a media file: a Git LFS pointer (oid, size) or downloaded content (checked)
 src/library/mp4.ts        checks an MP4's box structure, brand and video track
 src/library/schema.ts     zod schemas for the metadata files
 src/library/muscle-groups.ts  the muscle group enum, mirroring @fitme/core
 src/library/upload-plan.ts   planUploads(media, existingKeys): the media objects a release uploads (pure)
-src/validate.ts           pnpm validate: runs the loader and prints "valid" or every problem
+src/validate.ts           pnpm validate: runs the loaders and prints "valid" or every problem
 src/bundle.ts             pnpm bundle: writes library.json
 src/release.ts            pnpm release plan|upload|publish: the release's S3 and Blob steps
-fixtures/library/         a pointer-only copy of the fixture Exercises; fixtures/library.json is its expected bundle
-scripts/check-exercise-slugs.sh  PR CI: fails when an Exercise folder on the base branch is deleted or renamed
-.github/workflows/ci.yml  PR CI: lint, slugs, typecheck, tests, validation, bundle (no LFS download)
+fixtures/library/         pointer-only fixture Exercises (exercises/) and made-up Covers (covers/); fixtures/library.json is its expected bundle
+scripts/check-permanent-ids.sh  PR CI: fails when an Exercise or Cover folder on the base branch is deleted or renamed
+.github/workflows/ci.yml  PR CI: lint, permanent ids, typecheck, tests, validation, bundle (no LFS download)
 .github/workflows/release.yml  the release, on every push to main (see Releases)
 ```
 
@@ -32,16 +35,17 @@ pnpm check / pnpm fix    # ultracite (Biome)
 pnpm typecheck           # tsc --noEmit
 pnpm test                # vitest
 pnpm exec vitest run src/library/load.test.ts  # a single test file
-pnpm validate [dir]      # validate the Exercise Library (default: exercises/)
+pnpm validate [root]     # validate <root>/exercises and <root>/covers (default root: the repo)
 pnpm validate --require-lfs-pointers  # as CI: every media file must be an LFS pointer
-pnpm bundle [out]        # bundle exercises/ as library.json (default: dist/library.json)
-scripts/check-exercise-slugs.sh [base-ref]  # as CI; default base origin/main
+pnpm validate fixtures/library --require-lfs-pointers  # the fixture Library
+pnpm bundle [out]        # bundle exercises/ and covers/ as library.json (default: dist/library.json)
+scripts/check-permanent-ids.sh [base-ref]  # as CI; default base origin/main
 pnpm release plan|upload|publish  # the release's steps; only the release workflow runs them
 ```
 
 ## The library.json bundle
 
-`pnpm bundle` is how the Exercise Library leaves this repo: the release (every merge to `main`, see Releases) publishes its output, and `apps/library`'s build validates it against its own zod schema (`apps/library/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
+`pnpm bundle` is how the Library leaves this repo: the release (every merge to `main`, see Releases) publishes its output, and `apps/library`'s build validates it against its own zod schema (`apps/library/src/bundle.ts` in the monorepo) and bakes it in. The bundle is the contract between the two repos:
 
 ```json
 {
@@ -57,15 +61,23 @@ pnpm release plan|upload|publish  # the release's steps; only the release workfl
       "thumbnail": { "oid": "<sha256>", "extension": "png" },
       "video": { "oid": "<sha256>", "extension": "mp4" }
     }
+  ],
+  "covers": [
+    {
+      "id": "3f2b8a4e-6c1d-4e5f-9a7b-1c2d3e4f5a6b",
+      "muscle_groups": ["chest", "triceps"],
+      "image": { "oid": "<sha256>", "extension": "jpg" }
+    }
   ]
 }
 ```
 
-- No URLs, sizes or paths: both sides derive a media object's path as `<slug>/<oid>.<ext>`, and the API resolves URLs on its Supabase project.
-- Exercises are sorted by Exercise slug.
+- No URLs, sizes or paths: both sides derive a media object's path as `<slug>/<oid>.<ext>` (a Cover's image as `covers/<id>/<oid>.<ext>`), and the API resolves URLs on its Supabase project.
+- Exercises are sorted by Exercise slug, Covers by Cover id.
+- **Covers:** always emitted, `[]` when `covers/` has none (the monorepo also accepts a bundle without the key). No locales and no alt text: a Cover is decorative.
 - **Locales:** `en` always; each translation (`uk`) only for an Exercise that has its folder, with the same three fields.
-- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. The release bundles first, before it pulls the LFS content it uploads. An invalid Exercise Library prints the loader's problems and exits 1, like `pnpm validate`.
-- A format change touches both repos: the monorepo's schema first (it rejects anything it doesn't know), then `src/library/bundle.ts` here. `src/library/bundle.test.ts` bundles `fixtures/library/` and compares the result with `fixtures/library.json`, a copy of the monorepo's `apps/library/fixtures/library.json`: keep the two copies equal.
+- **Reads only LFS pointers:** every media file must be a pointer, so bundling never reads LFS content. Bundle from a checkout made with `GIT_LFS_SKIP_SMUDGE=1` (as CI does); with LFS content checked out, every media file is a problem. The release bundles first, before it pulls the LFS content it uploads. An invalid Library prints the loaders' problems and exits 1, like `pnpm validate`.
+- A format change touches both repos: the monorepo's schema first (it rejects anything it doesn't know), then `src/library/bundle.ts` here. `src/library/bundle.test.ts` bundles `fixtures/library/` (its `exercises/` and `covers/`) and compares the result with `fixtures/library.json`, a copy of the monorepo's `apps/library/fixtures/library.json`: keep the two copies equal.
 
 ## Adding an Exercise
 
@@ -74,19 +86,26 @@ pnpm release plan|upload|publish  # the release's steps; only the release workfl
 3. `pnpm validate`: with the media content present, this also checks the thumbnail's pixel limit and decodes both files.
 4. Commit and open a pull request. CI validates it from the pointers. Merging it to `main` is a content release (see Releases).
 
+## Adding a Cover
+
+1. `git lfs install` (once per machine).
+2. Export the served copy from the master (see Licensed photos): a JPEG about 1080 px on its short side (the size the app shows, ~q85), never the master itself.
+3. Add `covers/<id>/` with a new lowercase uuid as its folder name (`uuidgen | tr A-Z a-z`), as in Covers: `metadata.json` and `image.{jpg,png,webp}`.
+4. `pnpm validate`, commit and open a pull request, as for an Exercise.
+
 ## Releases
 
 Merging a pull request to `main` is a content release. `.github/workflows/release.yml` runs it, one release at a time (a `concurrency` group that never cancels a running release; of several queued releases only the newest runs, and it carries every earlier merge's content), strictly in this order, so a live deployment never points at media that isn't uploaded:
 
 1. **CI** (`ci.yml`, called as is): lint, typecheck, tests, validation and bundle, from the pointers.
 2. **Bundle** `dist/library.json` (`pnpm bundle`), while the checkout still has only pointers.
-3. **Plan** (`pnpm release plan`): lists the `exercise-media` bucket and plans every media object missing from it (`planUploads` in `src/library/upload-plan.ts`) to `dist/upload-plan.json`.
+3. **Plan** (`pnpm release plan`): lists the `exercise-media` bucket and plans every media object (Exercise media and Cover images) missing from it (`planUploads` in `src/library/upload-plan.ts`) to `dist/upload-plan.json`.
 4. **Pull** only the planned files' LFS objects (`git lfs pull --include`), never the whole LFS store, and `pnpm validate` them with their content (pixel limit, decoding).
 5. **Upload** them (`pnpm release upload`) through Supabase's S3 endpoint, after checking each file's sha256 against its oid.
 6. **Publish** `dist/library.json` to the private Blob store as `library.json`, overwriting the previous one (`pnpm release publish`). First it checks the release's commit is still `main`'s head: a re-run of an older release fails there instead of publishing stale content over a newer release's.
 7. **Redeploy:** `POST` the Vercel deploy hook. Vercel rebuilds the monorepo's `main`, whose `apps/library` build fetches the new `library.json` and bakes it in. It reads the blob with `useCache: false`, from origin storage rather than the Blob CDN, so it gets the bundle just published even though the pathname is overwritten.
 
-- **Media objects** live at `<slug>/<oid>.<ext>` with their content type and `Cache-Control: public, max-age=31536000, immutable`. The path is part of the contract with `apps/library`, which builds the same paths into its media URLs (`mediaObjectPath` in `src/served-library.ts` in the monorepo): change both together. Objects already in the bucket are skipped; nothing is ever overwritten or deleted, so every earlier deployment's media stays available.
+- **Media objects** live at `<slug>/<oid>.<ext>` (a Cover's image at `covers/<id>/<oid>.<ext>`, apart from Exercise media) with their content type and `Cache-Control: public, max-age=31536000, immutable`. The path is part of the contract with `apps/library`, which builds the same paths into its media URLs (`mediaObjectPath` and `coverObjectPath` in `src/served-library.ts` in the monorepo): change both together. Objects already in the bucket are skipped; nothing is ever overwritten or deleted, so every earlier deployment's media stays available.
 - **Failures and re-runs:** any failing step stops the release, so a failed upload never publishes the bundle. Re-running the latest release is safe: uploaded objects are skipped, and publishing the bundle and calling the hook are idempotent.
 - **The release ends when the build is queued:** the hook answers with a pending job, and the workflow fails only if the hook doesn't queue one. Whether the build succeeds shows in the `fitme-exercises` Vercel project (a failed production deployment notifies there), and production stays on the previous deployment until one does. Once the cause is fixed, redeploy from Vercel or re-run the release.
 - **Configuration** (GitHub Actions): the variables `SUPABASE_S3_ENDPOINT` (the full S3 endpoint, `https://<host>/storage/v1/s3`) and `SUPABASE_S3_REGION`; the secrets `SUPABASE_S3_ACCESS_KEY_ID`, `SUPABASE_S3_SECRET_ACCESS_KEY` (an S3 access key, never the service role), `BLOB_READ_WRITE_TOKEN` and `EXERCISES_DEPLOY_HOOK_URL`. Nothing from the monorepo is checked out or run here.
@@ -117,24 +136,52 @@ exercises/
 
 Every problem names the Exercise and the file, e.g. `bench-press/metadata.json: unknown muscle group "neck"`.
 
+## Covers
+
+A Cover is a Library photo a Workout's card shows behind its content, tagged with the muscle groups it suits (ADR 0014 in the monorepo). The server gives each new Workout one, matched by muscle group.
+
+```
+covers/
+  3f2b8a4e-6c1d-4e5f-9a7b-1c2d3e4f5a6b/   the Cover id
+    metadata.json              { "muscle_groups": ["chest", "triceps"] }
+    image.jpg                  jpg, png or webp; at most 25 MB and 50 megapixels (Git LFS)
+```
+
+- **Cover id rules:** the folder name is the Cover id, a lowercase uuid (`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`, the monorepo's `COVER_ID`). Being a folder name, an id can't repeat; the lowercase rule rules out case variants. It is permanent: Workouts store it. A Cover is added, never removed or renamed: PR CI fails when a Cover folder on the base branch is gone, like an Exercise's. Change its muscle groups in `metadata.json` instead.
+- Muscle groups follow the Exercise rules: from `src/library/muscle-groups.ts`, at least one, no repeats. `metadata.json` is strict.
+- The image follows the thumbnail rules (lowercase extension, exactly one, Git LFS, decoded when its content is present). A Cover folder holds only `metadata.json` and the image; no locales, no alt text.
+- `covers/` is optional: without it the Library has no Covers. Problems name the Cover and the file, e.g. `Cover 3f2b…  3f2b…/metadata.json`.
+
+### Licensed photos
+
+Cover photos are bought stock (Unsplash+). The licence (checked 2026-10-30) covers commercial use but is non-sublicensable and forbids keeping the files on a shared server, shared asset library or digital asset management system. So:
+
+- **Masters** (the full-resolution downloads) stay in the owner's own storage. They are never committed here, uploaded to the bucket or shared.
+- **The served copy** (the image the app shows) is committed here as `covers/<id>/image.<ext>` in Git LFS, a private repo, decided with the maintainer on 2026-10-30. The release uploads it to the private `exercise-media` bucket, from which the app serves it. It is the copy the product serves, never a store of the masters.
+- **Fixtures** (`fixtures/library/covers/`, and the monorepo's) are made-up pointers: never commit a real photo there, nor anywhere in the public monorepo.
+- Avoid photos with visible brands.
+
 ## Media and Git LFS
 
-Media (`exercises/**/*.{jpg,png,webp,mp4}`) is tracked with Git LFS (`.gitattributes`). Install Git LFS before adding media (`git lfs install`).
+Media (`exercises/**/*.{jpg,png,webp,mp4}` and `covers/**/*.{jpg,png,webp}`) is tracked with Git LFS (`.gitattributes`). Install Git LFS before adding media (`git lfs install`).
 
 - **Content hash = the Git LFS oid.** With LFS content not downloaded (CI, or `GIT_LFS_SKIP_SMUDGE=1`), each media file in the working tree is a pointer; the loader reads `oid` and `size` from it and never downloads anything. With LFS content downloaded (a normal clone with Git LFS installed), the loader hashes the file with sha256, which is exactly how Git LFS defines the oid, so both give the same value.
 - **Size limits** use the pointer's `size` (or the file size), so they are always checked. 1 MB is 1,000,000 bytes.
 - **The 50 megapixel limit** needs the image's pixel dimensions, which a pointer doesn't carry. It is checked only when the image's content is present locally: on a content author's machine (where the thumbnail is added) and wherever LFS objects are fetched (the release workflow fetches the objects it uploads). PR CI, which never downloads LFS content, checks it only through the size limit. The same goes for the content checks: a thumbnail must decode (sharp) and match its extension, and a video must be a structurally valid MP4 (an MP4 brand in `ftyp`) with a video track that has a sample description and at least one sample (samples are not decoded; fragmented MP4 is not supported).
 - **CI requires pointers.** PR CI runs `pnpm validate --require-lfs-pointers` and `pnpm bundle`: a media file that checks out as content rather than a pointer there was committed without Git LFS, and is a problem. Locally the same problem means LFS content is checked out.
 - Exercise folders and their media files are loaded sequentially, so downloaded media never piles up in memory. An optional original can be up to 100 MB.
-- Pointer-only test Exercises live in `fixtures/library/` with the matching `fixtures/library.json` bundle.
+- Pointer-only test Exercises and Covers live in `fixtures/library/` (`exercises/`, `covers/`) with the matching `fixtures/library.json` bundle.
 
 ## Glossary
 
 **Exercise**:
 A named movement from the Exercise Library, independent of any User. Identified by its Exercise slug.
 
-**Exercise Library**:
-The shared collection of every Exercise, with its metadata, text and media. This repo is its home; the Exercise Library API (`apps/library` in the monorepo) serves it.
+**Cover**:
+A Library photo a Workout's card shows behind its content, tagged with the muscle groups it suits. Identified by its Cover id, a permanent lowercase uuid.
+
+**Exercise Library** (the **Library**):
+The shared collection of every Exercise and every Cover, with their metadata, text and media. This repo is its home; the Exercise Library API (`apps/library` in the monorepo) serves it.
 _Avoid_: exercise database, exercises table
 
 **Exercise slug**:

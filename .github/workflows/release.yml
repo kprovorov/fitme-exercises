@@ -47,9 +47,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Validates the Exercise Library again (bundling runs the loader). Runs
+      # Validates the Library again (bundling runs the loaders). Runs
       # before any LFS content is checked out: bundling reads only pointers.
-      - name: Bundle the Exercise Library
+      - name: Bundle the Library
         run: pnpm bundle
 
       - name: Plan the media upload
